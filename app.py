@@ -9,8 +9,8 @@ from dash.dependencies import State, Input, Output
 app = dash.Dash(__name__)
 server = app.server
 
-#app.scripts.config.serve_locally = True
-app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
+#app.css.config.serve_locally = True
 
 
 # CSS Imports
@@ -374,19 +374,19 @@ def presetting_enable_power(pre_setting_switch):
     [State('intermediate-value', 'children')]
 )
 def start_terminate(power_button, com):
-    ser = serial.Serial(com)
+    #ser = serial.Serial(com)
     if power_button == False:
-        ser.flush()
+        #ser.flush()
         term = "/1TRR\r".encode('utf-8')
-        ser.write(term)
+        #ser.write(term)
 
-        response = str(ser.read(7))
-        return response
+        #response = str(ser.read(7))
+        return #response
     else:
-        response = 'Press off to terminate current command and flush serial.'
-        return response
+        #response = 'Press off to terminate current command and flush serial.'
+        return #response
 
-# Enable Velocity
+#Enable Velocity
 
 
 @app.callback(
