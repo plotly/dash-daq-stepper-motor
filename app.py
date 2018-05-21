@@ -38,266 +38,290 @@ for css in external_css:
 #     ser.writeTimeout = 0
 
 
-app.layout = html.Div([
+app.layout = html.Div(
+    [   #Banner
+        html.Div(
+            [
+                html.H2(
+                    "Stepper Motor Control Panel"
+                ),
+                html.Img(
+                    src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe-inverted.png"
+                ),
+            ], 
+            className='banner'
+        ),
+        html.Div(
+            [
 
-    # Header Banner
-    html.Div([
-        html.H2("Stepper Motor Control Panel"),
-        html.Img(src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe-inverted.png"),
-    ], className='banner'),
-
-    # First Box
-    html.Div([
-        # Second Box
-        # Serial Monitor
-        html.Div([
-            html.H3("Serial Monitor",
-                    style={"textAlign": "Left"}),
-
-
-            dcc.Textarea(
+        
+        html.Div(
+            [
+                html.H3(
+                    "Serial Monitor",
+                    style={"textAlign": "Left"}
+                ),
+                dcc.Textarea(
                 id="serial-response",
                 placeholder='',
                 value='',
                 style={'width': '100%', 'height': '500%'},
                 disabled=True,
                 rows=10,
-            ),
-            # Third Box
+                ),
+
             # Velocity and Position Knobs
-            html.Div([
-                html.Div([
-                    daq.Knob(
-                        id="stepper-velocity",
-                        label="Velocity (Steps)",
-                        max=10000,
-                        min=0,
-                        value=0,
-                        size=120,
-                        scale=1)
-                ], className="three columns"),
-
-                html.Div([
-                    daq.Knob(
-                        id="stepper-position",
-                        label="Position (Degree)",
-                        max=360,
-                        min=0,
-                        value=0,
-                        scale=1,
-                        size=120,
-                        className="three columns offset-by-two"
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            daq.Knob(
+                            id="stepper-velocity",
+                            label="Velocity (Steps)",
+                            max=10000,
+                            min=0,
+                            value=0,
+                            size=120,
+                            scale=1
+                            )
+                        ], 
+                        className="three columns"
                     ),
-
-
-                ], className="one columns offset-by-two"),
+                    html.Div(
+                        [
+                            daq.Knob(
+                            id="stepper-position",
+                            label="Position (Degree)",
+                            max=360,
+                            min=0,
+                            value=0,
+                            scale=1,
+                            size=120,
+                            className="three columns offset-by-two"
+                    ),
+                ], 
+                className="one columns offset-by-two"
+            ),
 
                 # Power Button Velo Switch and Pos Switch
-                html.Div([
-                    daq.PowerButton(
-                        id="start-stop",
-                        label="On/Off",
-                        on=False,
-                        disabled=True,
-                        className="one columns offset-by-four",
-                        style={"paddingTop": "15%"}
-                    ),
+                html.Div(
+                    [
+                        daq.PowerButton(
+                            id="start-stop",
+                            label="On/Off",
+                            on=False,
+                            disabled=True,
+                            className="one columns offset-by-four",
+                            style={"paddingTop": "15%"}
+                        ),
 
-                    daq.BooleanSwitch(
-                        id='switch-position',
-                        on=False,
-                        label="Position Mode",
-                        vertical=True,
-                        labelPosition="top",
-                        disabled=True,
-                        className='three columns offset-by-one',
-                        style={"paddingTop": "15%", "textAlign": "center"}
-                    ),
+                        daq.BooleanSwitch(
+                            id='switch-position',
+                            on=False,
+                            label="Position Mode",
+                            vertical=True,
+                            labelPosition="top",
+                            disabled=True,
+                            className='three columns offset-by-one',
+                            style={"paddingTop": "15%", "textAlign": "center"}
+                        ),
 
-                    daq.BooleanSwitch(
-                        id='switch-velocity',
-                        on=False,
-                        label="Velocity Mode",
-                        vertical=True,
-                        labelPosition="top",
-                        disabled=True,
-                        className='three columns',
-                        style={"paddingTop": "15%", "textAlign": "center"}
-
-                    ),
-                ], className="six columns"),
-
-
-            ], className="row"),
-        ],  className="five columns"),
-
-        # Speed Gauge
-        # Second Box
-        html.Div([
-            daq.Gauge(
-                id="speed-gauge",
-                showCurrentValue=True,
-                units="Microsteps/Seconds",
-                scale={"0": "Low", "5": "Medium", "10": "High"},
-                value=0,
-                size=240,
-                color="#FF5E5E",
-                label="Speed",
-                style={"paddingRight": "10%", "paddingTop": "10%"}
-            )], className="three columns"),
-
-        # Second Box
-        # Start Settings Switch
-        html.Div([
-            # Third Box
-            html.Div([
-                # Fourth Box
-                html.Div([
-                    html.H3("Start Settings",
-                            style={"textAlign": "Left", "paddingLeft": "5%"}),
-
-                    daq.ToggleSwitch(
-                        id="pre-settings",
-                        label=["Not Set", "Set"],
-                        color="#FF5E5E",
-                        size=32,
-                        value=False,
-                        style={"marginLeft": "4%", "marginBottom": "1%"},
-
-                        className="nine columns"
-                    )], className="four columns"),
-            ]),
-            # Fourth Box
-            html.Div([
-                # Fifth Box
-                # Input Settings Boxes
-                html.Div([
-                    dcc.Input(
-                        id='acceleration-set',
-                        placeholder='Acceleration',
-                        type='text',
-                        value='300',
-                        className='three columns',
-                        style={"width": "30%", "marginLeft": "4.87%"}
-                    ),
-
-                    dcc.Input(
-                        id='address-set',
-                        placeholder='Address',
-                        type='text',
-                        value='1',
-                        className='three columns',
-                        maxlength="1",
-                        style={"width": "30%"}
-                    ),
-
-                    dcc.Input(
-                        id='baudrate',
-                        placeholder='Baudrate',
-                        type='text',
-                        value='9600',
-                        className='three columns',
-                        style={"width": "30%", "marginTop": "3%",
-                               "marginLeft": "5%"}
-                    ),
-
-                    dcc.Input(
-                        id='com-port',
-                        placeholder='Comport',
-                        type='text',
-                        value='21',
-                        className='three columns',
-                        style={"width": "30%",  "marginTop": "3%"}
-                    ),
-
-                ], className="four columns")
-            ]),
-            # Fourth Box
-
-            # Sliders
-            html.Div([
-                # Fifth Box
-                html.Div([
-                     html.H5("Motor Current",
-                             style={"textAlign": "Left"}),
-                     daq.Slider(
-                         id='motor-current',
-                         value=30,
-                         min=0,
-                         max=100,
-                         size=550,
-                         step=1,
-                         handleLabel={
-                             "showCurrentValue": 'True', "label": "VALUE"},
-                         marks={"0": "0", "100": "100", "50": "50"},
-                         targets={"80": {"showCurrentValue": "False",
-                                         "label": "WARNING", "color": "#685"}, "100": ""},
-                         className='six columns'
-                     ),
-
-                     ], className="four columns column", style={"paddingLeft": "4%", "marginTop": "1.5%"}),
-                # Fifth Box
-                html.Div([
-                    html.H5("Hold Current",
-                            style={"textAlign": "Left"}),
-                    daq.Slider(
-                        id='hold-current',
-                        value=20,
-                        min=0,
-                        max=100,
-                        size=550,
-                        step=1,
-                        handleLabel={
-                            "showCurrentValue": 'True', "label": "VALUE"},
-                        marks={"0": "0", "100": "100", "50": "50"},
-                        targets={"80": {"showCurrentValue": "False",
-                                        "label": "WARNING", "color": "#685"}, "100": ""},
-                        className='six columns'
-                    )], className="four columns", style={"marginTop": "1.5%"}),
-
-                # Fifth Box
-                html.Div([
-                    html.H5("Step Size",
-                            style={"textAlign": "Left"}),
-                    daq.Slider(
-                        id='step-size',
-                        value=4,
-                        min=1,
-                        max=256,
-                        size=550,
-                        step=None,
-                        handleLabel={
-                            "showCurrentValue": 'True', "label": "VALUE"},
-                        marks={"1": "1", "2": '', "4": '', "8": "", "16": "",
-                               "32": "", "64": "", "128": "", "256": "256"},
-                        className='six columns'
-                    )], className="four columns", style={"marginTop": "1.5%"}),
-                # classname
-            ]),
-        ]),
-    ], style={"marginLeft": "10%", "marginRight": "auto"}),
-
-    html.Div([
+                        daq.BooleanSwitch(
+                            id='switch-velocity',
+                            on=False,
+                            label="Velocity Mode",
+                            vertical=True,
+                            labelPosition="top",
+                            disabled=True,
+                            className='three columns',
+                            style={"paddingTop": "15%", "textAlign": "center"}
+                        ),
+                    ], 
+                    className="six columns"
+                ),
+            ], 
+            className="row"
+        ),
+    ],
+    className="five columns"
+),
+# Speed Gauge
+html.Div(
+    [
+        daq.Gauge(
+            id="speed-gauge",
+            showCurrentValue=True,
+            units="Microsteps/Seconds",
+            scale={"0": "Low", "5": "Medium", "10": "High"},
+            value=0,
+            size=240,
+            color="#FF5E5E",
+            label="Speed",
+            style={"paddingRight": "10%", "paddingTop": "10%"}
+        )
+    ], 
+    className="three columns"
+),
+# Start Settings Switch
+html.Div(
+    [
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H3(
+                            "Start Settings",
+                            style={"textAlign": "Left", "paddingLeft": "5%"}
+                        ),
+                        
+                        daq.ToggleSwitch(
+                            id="pre-settings",
+                            label=["Not Set", "Set"],
+                            color="#FF5E5E",
+                            size=32,
+                            value=False,
+                            style={"marginLeft": "4%", "marginBottom": "1%"},
+                            className="nine columns"
+                        )
+                    ], 
+                    className="four columns"
+                ),
+            ]
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        dcc.Input(
+                            id='acceleration-set',
+                            placeholder='Acceleration',
+                            type='text',
+                            value='300',
+                            className='three columns',
+                            style={"width": "30%", "marginLeft": "4.87%"}
+                        ),
+                        dcc.Input(
+                            id='address-set',
+                            placeholder='Address',
+                            type='text',
+                            value='1',
+                            className='three columns',
+                            maxlength="1",
+                            style={"width": "30%"}
+                        ),
+                        dcc.Input(
+                            id='baudrate',
+                            placeholder='Baudrate',
+                            type='text',
+                            value='9600',
+                            className='three columns',
+                            style={"width": "30%", "marginTop": "3%",
+                            "marginLeft": "5%"}
+                        ),
+                        dcc.Input(
+                            id='com-port',
+                            placeholder='Comport',
+                            type='text',
+                            value='21',
+                            className='three columns',
+                            style={"width": "30%",  "marginTop": "3%"}
+                        ),
+                    ], 
+                    className="four columns"
+                )
+            ]
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H5("Motor Current",
+                                style={"textAlign": "Left"}
+                        ),
+                        daq.Slider(
+                            id='motor-current',
+                            value=30,
+                            min=0,
+                            max=100,
+                            size=550,
+                            step=1,
+                            handleLabel={"showCurrentValue": 'True', "label": "VALUE"},
+                            marks={"0": "0", "100": "100", "50": "50"},
+                            targets={"80": {"showCurrentValue": "False", "label": "WARNING", "color": "#685"}, "100": ""},
+                            className='six columns'
+                        ),
+                    ], 
+                    className="four columns column", 
+                    style={"paddingLeft": "4%", "marginTop": "1.5%"}
+                ),
+                html.Div(
+                    [
+                        html.H5(
+                            "Hold Current",
+                            style={"textAlign": "Left"}
+                        ),
+                        daq.Slider(
+                            id='hold-current',
+                            value=20,
+                            min=0,
+                            max=100,
+                            size=550,
+                            step=1,
+                            handleLabel={"showCurrentValue": 'True', "label": "VALUE"},
+                            marks={"0": "0", "100": "100", "50": "50"},
+                            targets={"80": {"showCurrentValue": "False", "label": "WARNING", "color": "#685"}, "100": ""},
+                            className='six columns'
+                        )
+                    ], 
+                    className="four columns", 
+                    style={"marginTop": "1.5%"}
+                ),
+                html.Div(
+                    [
+                        html.H5(
+                            "Step Size", 
+                            style={"textAlign": "Left"}
+                        ),
+                        daq.Slider(
+                            id='step-size',
+                            value=4,
+                            min=1,
+                            max=256,
+                            size=550,
+                            step=None,
+                            handleLabel={"showCurrentValue": 'True', "label": "VALUE"},
+                            marks={"1": "1", "2": '', "4": '', "8": "", "16": "", "32": "", "64": "", "128": "", "256": "256"},
+                            className='six columns'
+                        )
+                    ], 
+                    className="four columns", 
+                    style={"marginTop": "1.5%"}),
+                ]
+            ),
+        ]
+    ),
+], 
+style={
+"marginLeft": "10%", 
+"marginRight": "auto"}
+),
+#Placeholder Divs 
+html.Div(
+    [
         html.Div(id='div-one'),
         html.Div(id="div-two"),
         html.Div(id="div-three"),
         html.Div(id="div-four"),
         html.Div(id="intermediate-value")
-    ],  style={"visibility": "hidden"})
-
-], style={'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'})
+    ],  
+    style={"visibility": "hidden"}
+)
+], 
+style={'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
+)
 
 
 # Global Variables
-
-# @app.callback(
-#     Output('intermediate-value', 'children'),
-#     [Input('baudrate', 'value')])
-# def clean_data(baudrate):
-
-#      cleaned_df = baudrate
-#      return cleaned_df.to_json(date_format='iso', orient='split')
-
 @app.callback(
     Output('intermediate-value', 'children'),
     [Input('com-port', 'value')])
@@ -346,14 +370,6 @@ def presetting_start(preset_switch, address, motor_current, hold_current, stepsi
         return response
 
 
-# @app.callback(Output('graph', 'figure'),
-# [Input('intermediate-value', 'children')])
-# def update_graph(jsonified_cleaned_data):
-
-#     # more generally, this line would be
-#     baud = json.loads(jsonified_cleaned_data)
-#     return baud
-
 # Preset Switch Disable Power Button
 @app.callback(
     Output("start-stop", 'disabled'),
@@ -366,8 +382,6 @@ def presetting_enable_power(pre_setting_switch):
         return True
 
 # Power Button Terminate Edit
-
-
 @app.callback(
     Output("div-two", 'children'),
     [Input("start-stop", "on")],
@@ -387,8 +401,6 @@ def start_terminate(power_button, com):
         return #response
 
 #Enable Velocity
-
-
 @app.callback(
     Output("switch-velocity", "disabled"),
     [Input("start-stop", "on")]
@@ -400,8 +412,6 @@ def enable_velocity(start_stop):
         return True
 
 # Enable Position
-
-
 @app.callback(
     Output("switch-position", "disabled"),
     [Input("start-stop", "on")]
@@ -412,9 +422,7 @@ def enable_position(start_stop):
     else:
         return True
 
-# Velocity Knob Position
-
-
+# Velocity Knob Position (# Modify to pps)
 @app.callback(
     Output("div-three", "children"),
     [Input("stepper-velocity", "value"),
@@ -423,7 +431,6 @@ def enable_position(start_stop):
      State("acceleration-set", "value"),
      State("switch-position", "on"),
      State('intermediate-value', 'children')])
-# Modify to pps
 def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_position, com):
 
     if (switch_velo == True):
@@ -444,8 +451,6 @@ def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_posit
         return response
 
 # Speed Gauge
-
-
 @app.callback(
     Output("speed-gauge", "value"),
     [Input("stepper-velocity", "value")],
@@ -492,7 +497,6 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
 
 
 # Serial Monitor Response
-
 @app.callback(
     Output("serial-response", "value"),
     [Input("div-one", "children"),
