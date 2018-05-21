@@ -23,7 +23,7 @@ external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
 for css in external_css:
     app.css.append_css({"external_url": css})
 
-ser = serial.Serial('COM21')
+#ser = serial.Serial('COM21')
 # ser.Serial('COM21')
 
 
@@ -321,7 +321,7 @@ def clean_data(com_port):
 def presetting_start(preset_switch, address, motor_current, hold_current, stepsize, accel_set, baud, com):
     if ((baud != '') and (accel_set != '') and (address != '') and (preset_switch == True)):
 
-        #ser = serial.Serial(com)
+        ser = serial.Serial(com)
         ser.bytesize = 8
         ser.parity = 'N'
         ser.stopbits = 1
@@ -374,7 +374,7 @@ def presetting_enable_power(pre_setting_switch):
     [State('intermediate-value', 'children')]
 )
 def start_terminate(power_button, com):
-    #ser = serial.Serial(com)
+    ser = serial.Serial(com)
     if power_button == False:
         ser.flush()
         term = "/1TRR\r".encode('utf-8')
@@ -427,7 +427,7 @@ def enable_position(start_stop):
 def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_position, com):
 
     if (switch_velo == True):
-            #ser = serial.Serial(com)
+        ser = serial.Serial(com)
         step_velo = int(stepper_velo)
 
         velo = "/{}V{}L{}P0RR\r".format(address, step_velo, acceleration)
@@ -471,7 +471,7 @@ def speed_gauge(stepper_velo, switch_velo):
 def position_mode(switch_position, step_position, address, acceleration, step_velocity, step_size, velocity_position, com):
 
     if (switch_position == True):
-        #ser = serial.Serial(com)
+        ser = serial.Serial(com)
         step_velocity = int(step_velocity)
         step_position = int(step_position)
         step_pos = int(step_position * (200*(step_size))/360)
