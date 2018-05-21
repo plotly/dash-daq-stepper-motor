@@ -9,6 +9,9 @@ import pandas as pd
 app = dash.Dash(__name__)
 server = app.server
 
+app.scripts.config.serve_locally = True
+app.css.config.serve_locally = True
+
 #app.scripts.config.serve_locally = True
 
 # CSS Imports
