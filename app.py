@@ -9,7 +9,7 @@ from dash.dependencies import State, Input, Output
 app = dash.Dash(__name__)
 server = app.server
 
-app.scripts.config.serve_locally = True
+#app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
 
