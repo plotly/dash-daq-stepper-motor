@@ -1,8 +1,7 @@
-import os
+
 import serial
 import plotly.plotly as py
 from plotly.graph_objs import *
-import pandas as pd
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -11,16 +10,8 @@ from dash.dependencies import State, Input, Output
 from flask_caching import Cache
 
 
-df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/polar_dataset.csv")
 app = dash.Dash(__name__)
 server = app.server
-CACHE_CONFIG = {
-    'CACHE_TYPE': 'filesystem'
-}
-cache = Cache()
-
-
-
 
 app.scripts.config.serve_locally = True
 
