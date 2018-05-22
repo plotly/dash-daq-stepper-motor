@@ -1,16 +1,30 @@
+import os
 import serial
+import plotly.plotly as py
+from plotly.graph_objs import *
+import pandas as pd
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_daq as daq
 from dash.dependencies import State, Input, Output
+from flask_caching import Cache
 
 
+df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/polar_dataset.csv")
 app = dash.Dash(__name__)
 server = app.server
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'filesystem'
+}
+cache = Cache()
+
+
+
 
 app.scripts.config.serve_locally = True
-#app.css.config.serve_locally = True
+
+
 
 
 # CSS Imports
@@ -148,19 +162,33 @@ app.layout = html.Div(
 # Speed Gauge
 html.Div(
     [
+        html.Div(
+    [   
+
         daq.Gauge(
             id="speed-gauge",
             showCurrentValue=True,
             units="Microsteps/Seconds",
             scale={"0": "Low", "5": "Medium", "10": "High"},
             value=0,
-            size=240,
+            size=150,
             color="#FF5E5E",
             label="Speed",
-            style={"paddingRight": "10%", "paddingTop": "10%"}
+            style={"paddingTop": "10%"},
+            className="six columns"
+        ),
+        dcc.Graph(
+            id= "position-gauge",
+            className="six columns"
         )
-    ], 
-    className="three columns"
+
+        
+
+       
+    ], className="rows" 
+
+)
+], className="three columns"
 ),
 # Start Settings Switch
 html.Div(
@@ -330,6 +358,7 @@ def clean_data(com_port):
     return com_port
 
 
+
 # Enable Preset Settings
 @app.callback(
     Output("div-one", 'children'),
@@ -388,17 +417,17 @@ def presetting_enable_power(pre_setting_switch):
     [State('intermediate-value', 'children')]
 )
 def start_terminate(power_button, com):
-    #ser = serial.Serial(com)
+    ser = serial.Serial(com)
     if power_button == False:
-        #ser.flush()
+        ser.flush()
         term = "/1TRR\r".encode('utf-8')
-        #ser.write(term)
+        ser.write(term)
 
-        #response = str(ser.read(7))
-        return #response
+        response = str(ser.read(7))
+        return response
     else:
-        #response = 'Press off to terminate current command and flush serial.'
-        return #response
+        response = 'Press off to terminate current command and flush serial.'
+        return response
 
 #Enable Velocity
 @app.callback(
@@ -438,7 +467,6 @@ def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_posit
         step_velo = int(stepper_velo)
 
         velo = "/{}V{}L{}P0RR\r".format(address, step_velo, acceleration)
-        print(velo)
         ser.write(velo.encode("utf-8"))
 
         if step_velo == 0 or step_velo == 5000:
@@ -471,9 +499,9 @@ def speed_gauge(stepper_velo, switch_velo):
      State("acceleration-set", "value"),
      State("stepper-velocity", "value"),
      State("step-size", 'value'),
-     State("switch-velocity", "on"),
-     State('intermediate-value', 'children')])
-def position_mode(switch_position, step_position, address, acceleration, step_velocity, step_size, velocity_position, com):
+     State('intermediate-value', 'children')]
+)
+def position_mode(switch_position, step_position, address, acceleration, step_velocity, step_size, com):
 
     if (switch_position == True):
         ser = serial.Serial(com)
@@ -481,10 +509,9 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
         step_position = int(step_position)
         step_pos = int(step_position * (200*(step_size))/360)
 
-        velo = "/{}V{}L{}A{}RR\r".format(address, step_velocity, acceleration, step_pos)
-        ser.write(velo.encode("utf-8"))
+        posvelo = "/{}V{}L{}A{}RR\r".format(address, step_velocity, acceleration, step_pos)
+        ser.write(posvelo.encode("utf-8"))
 
-        print(velo)
 
         if step_position == 0 or step_position == 360:
             response = str(ser.read(7))
@@ -495,6 +522,49 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
         response = "Set velocity and bring to 0 or 360 to see response."
         return response
 
+#Position Gauge
+@app.callback(
+    Output("position-gauge", "figure"),
+    [Input("stepper-position", "value")]
+)
+
+def position_gauge(stepper_position):
+
+    trace = Scatterpolar(
+
+        r = [1],
+        theta = [stepper_position],
+        mode = 'lines+markers',
+        name = 'Figure',
+        line =  dict(
+            color = '"#ff66ab"',
+        ),
+        marker = dict(
+            color = "red",
+            symbol = "triangle-up",
+            size = 8 
+        ),   
+    )
+
+    layout = Layout(
+         autosize=True,
+            margin=Margin(
+            t=0,
+            b=0,
+            r=30,
+            l=35
+        ),
+        title = 'Stepper Position',
+        font = dict(
+        family = 'Arial, sans-serif;',
+        size = 12,
+        color = '#000'
+        ),
+    showlegend = False
+)
+
+    
+    return Figure(data=[trace], layout=layout)
 
 # Serial Monitor Response
 @app.callback(
@@ -521,4 +591,4 @@ if __name__ == '__main__':
     # ser = serial.Serial("COM21")
     # defaultset()
 
-    app.run_server(debug=False)
+    app.run_server(debug=True)
