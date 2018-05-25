@@ -353,7 +353,8 @@ app.layout = html.Div(
                                     id="color-picker",
                                     label="Color Picker",
                                     value=dict(hex="#000"),
-                                    size=150
+                                    size=150,
+                                    style={"border":"0px"}
                                 )
                             ],
                             style={"border-radius": "1px",
