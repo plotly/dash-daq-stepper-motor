@@ -13,6 +13,15 @@ app = dash.Dash(__name__)
 server = app.server
 app.scripts.config.serve_locally = True
 
+def defaultset():
+    ser.bytesize = 8
+    ser.parity = 'N'
+    ser.stopbits = 1
+    ser.timeout = None
+    ser.xonxoff = 0
+    ser.rtscts = 0
+    ser.dsrdtr = False
+    ser.writeTimeout = 0
 
 # CSS Imports
 external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
@@ -392,15 +401,6 @@ app.layout = html.Div(
     )
 
 
-# Global Variables Comport (optional)
-@app.callback(
-    Output('com-value', 'children'),
-    [Input('com-port', 'value')])
-def clean_data(com_port):
-    com_port = "COM" + com_port
-    return
-
-
 # Enable Preset Settings
 @app.callback(
     Output("div-one", 'children'),
@@ -411,13 +411,21 @@ def clean_data(com_port):
      State('step-size', 'value'),
      State('acceleration-set', 'value'),
      State('baudrate', 'value')])
+
 def presetting_start(preset_switch, address, motor_current, hold_current, stepsize, accel_set, baud):
-    if (baud != '') and (accel_set != '') and (address != '') and (preset_switch == True):
-        response = "xff/0@"
+    if ((baud != '') and (accel_set != '') and (address != '') and (preset_switch == True)):
+
+        ser.baudrate = baud
+        command = "/{}m{}h{}j{}L{}RR\r".format(address, motor_current, hold_current, stepsize, accel_set)
+        ser.flush()
+        ser.write(command.encode("utf-8"))
+
+        response = str(ser.read(7))
         return response
     else:
         response = "Enable set. Set motor settings before using."
         return response
+
 
 # Preset Switch Disable Power Button
 @app.callback(
@@ -435,19 +443,17 @@ def presetting_enable_power(preset_switch, address, accel_set, baud, com):
     else:
         return True
 
-# Stop Button Terminate
+# Stop Button Terminate 
 @app.callback(
     Output("div-two", 'children'),
     [Input("start-stop", "n_clicks")]
-)
+    )
 def start_terminate(stop):
-    stopchange = stop % 2
     if stop >= 1:
-        if stopchange == 0:
-            response = "xff/0'"
-        else:
-            response = "xff/0B"
-
+        ser.flush()
+        term = "/1TRR\r".encode('utf-8')
+        ser.write(term)
+        response = str(ser.read(7))
         return response
     else:
         response = 'Terminate commands and flush serial.'
@@ -475,7 +481,7 @@ def enable_position(stop):
     else:
         return True
 
-# Velocity Knob Position
+# Velocity Knob Position 
 @app.callback(
     Output("div-three", "children"),
     [Input("stepper-velocity", "value"),
@@ -485,12 +491,16 @@ def enable_position(stop):
      State("switch-position", "on")]
      )
 def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_position):
+
     if (switch_velo == True):
         step_velo = int(stepper_velo)
+        velo = "/{}V{}L{}P0RR\r".format(address, step_velo, acceleration)
+        ser.write(velo.encode("utf-8"))
+
         if step_velo == 0 or step_velo == 5000:
-            response = "xff/0B"
+            response = str(ser.read(7))
         else:
-            response = 'Bring to 0 or 5000 for serial response.'
+            response = 'Bring to 0 or 5000 to see response.'
         return response
     else:
         response = 'Set velocity knob. Enable velocity.'
@@ -507,6 +517,7 @@ def speed_gauge(stepper_velo, switch_velo):
         step_velo = int(stepper_velo/1000)
         return step_velo
 
+
 # Position Knob Position
 @app.callback(
     Output("div-four", 'children'),
@@ -520,8 +531,16 @@ def speed_gauge(stepper_velo, switch_velo):
 def position_mode(switch_position, step_position, address, acceleration, step_velocity, step_size):
 
     if (switch_position == True):
+        step_velocity = int(step_velocity)
+        step_position = int(step_position)
+        step_pos = int(step_position * (200*(step_size))/360)
+        print(step_pos)
+        posvelo = "/{}V{}L{}A{}RR\r".format(address, step_velocity, acceleration, step_pos)
+        ser.write(posvelo.encode("utf-8"))
+
+
         if step_position == 0 or step_position == 360:
-            response = "xff/0@"
+            response = str(ser.read(7))
         else:
             response = "Bring to 0 or 360 for serial response."
         return response
@@ -687,7 +706,6 @@ def mode_set(switch_velo, switch_position):
         mode = "No Mode Set"
         return mode
 
-
 # Serial Monitor Response
 @app.callback(
     Output("serial-response", "value"),
@@ -736,5 +754,8 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
 
 if __name__ == '__main__':
+    #Set COM Port Here:
+    ser = serial.Serial('COM21')
+    defaultset()
 
-    app.run_server(debug=True)
+    app.run_server(debug=False)
