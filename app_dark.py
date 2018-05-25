@@ -29,15 +29,21 @@ app.layout = html.Div(
         html.Div(
             id="container",
             style={"background-color": "#20304C"},
+
             children=[
                 html.H2(
                     "Dash DAQ: Stepper Motor Control Panel",
                 ),
+                html.A(
+                    
                 html.Img(
-                    src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/logo/new-branding/dash-logo-by-plotly-stripe-inverted.png"
+                    src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/excel/dash-daq/dash-daq-logo-by-plotly-stripe+copy.png",
+                ),
+                href="http://www.dashdaq.io"
                 )
-            ],
-            className="banner"
+            
+        ],
+        className="banner"
         ),
         html.Div(
             [
@@ -382,7 +388,7 @@ app.layout = html.Div(
                 html.Div(id="div-four"),
                 html.Div(id="com-value"),
                 html.Div(id='color-return'),
-                
+
                 daq.DarkThemeProvider
                 (
                     [
