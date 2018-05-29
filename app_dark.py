@@ -99,11 +99,11 @@ app.layout = html.Div(
                                     id="stepper-velocity",
                                     label="Velocity (Steps)",
                                     color="default",
-                                    max=10000,
+                                    max=51200,
                                     min=0,
                                     value=0,
                                     size=75,
-                                    scale={"interval": 2500},
+                                    scale={"interval": 12800},
                                     className="three columns",
                                     style={"marginLeft": "17%",
                                            "textAlign": "center"}
@@ -156,62 +156,7 @@ app.layout = html.Div(
                            "border": "1px solid rgb(216, 216, 216)"
                            }
                 ),
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                html.H3(
-                                    "Gauges",
-                                    style={"textAlign": "center"}),
-                                html.Div(
-                                    [
-                                        dcc.Graph(
-                                            id="position-gauge",
-                                            className="six columns",
-                                            style={"marginLeft": "13%", "display": "flex",
-                                                   "justify-content": "right",
-                                                   "align-items": "right"}
-                                        )
-                                    ],
-                                    className="row",
-                                    style={"border-radius": "1px",
-                                           "border-width": "5px",
-                                           "border-top": "1px solid rgb(216, 216, 216)",
-                                           "marginBottom": "20%"
-                                           }
-                                ),
-                                html.Div(
-                                    [
-                                        daq.Gauge(
-                                            id="speed-gauge",
-                                            showCurrentValue=True,
-                                            units="Microsteps/Seconds",
-                                            scale={"0": "Low",
-                                                   "5": "Medium", "10": "High"},
-                                            value=0,
-                                            size=175,
-                                            color="#FF5E5E",
-                                            label="Speed",
-                                            className="twelve columns",
-                                            style={"marginTop": "10%",
-                                                   "color": "#FFF"}
-                                        )
-                                    ],
-                                    className="row",
-                                    style={"border-radius": "1px",
-                                           "border-width": "5px",
-                                           "border-top": "1px solid rgb(216, 216, 216)"
-                                           }
-                                )
-                            ],
-                            style={"border-radius": "5px",
-                                   "border-width": "5px",
-                                   "border": "1px solid rgb(216, 216, 216)"
-                                   }
-                        ),
-                    ],
-                    className="four columns"
-                ),
+                
                 html.Div(
                     [
                         html.H3(
@@ -227,6 +172,7 @@ app.layout = html.Div(
                             color="#FF5E5E",
                             size=32,
                             value=False,
+                            disabled=False,
                             style={"marginBottom": "1%",
                                    "paddingTop": "2%"}
                         ),
@@ -375,7 +321,63 @@ app.layout = html.Div(
                            "border-width": "5px",
                            "border": "1px solid rgb(216, 216, 216)"
                     }
-                )
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.H3(
+                                    "Gauges",
+                                    style={"textAlign": "center"}),
+                                html.Div(
+                                    [
+                                        dcc.Graph(
+                                            id="position-gauge",
+                                            className="six columns",
+                                            style={"marginLeft": "13%", "display": "flex",
+                                                   "justify-content": "right",
+                                                   "align-items": "right"}
+                                        )
+                                    ],
+                                    className="row",
+                                    style={"border-radius": "1px",
+                                           "border-width": "5px",
+                                           "border-top": "1px solid rgb(216, 216, 216)",
+                                           "marginBottom": "20%"
+                                           }
+                                ),
+                                html.Div(
+                                    [
+                                        daq.Gauge(
+                                            id="speed-gauge",
+                                            showCurrentValue=True,
+                                            units="Revolution/Second",
+                                            scale={"0": "Low",
+                                                   "5": "Medium", "10": "High"},
+                                            value=0,
+                                            size=175,
+                                            color="#FF5E5E",
+                                            label="Revolutions Per Second",
+                                            className="twelve columns",
+                                            style={"marginTop": "10%",
+                                                   "color": "#FFF"}
+                                        )
+                                    ],
+                                    className="row",
+                                    style={"border-radius": "1px",
+                                           "border-width": "5px",
+                                           "border-top": "1px solid rgb(216, 216, 216)"
+                                           }
+                                )
+                            ],
+                            style={"border-radius": "5px",
+                                   "border-width": "5px",
+                                   "border": "1px solid rgb(216, 216, 216)"
+                                   }
+                        ),
+                    ],
+                    className="four columns"
+                ),
             ],
             className="row"
         ),
@@ -417,8 +419,11 @@ app.layout = html.Div(
             )
 
    ],
-    style = {'padding': '0px 10px 10px 10px',
-           'marginLeft': 'auto', 'marginRight': 'auto', "width": "1100",
+    style = {'padding': '0px 10px 0px 10px',
+           'marginLeft': 'auto', 
+           'marginRight': 'auto', 
+           "width": "1100", 
+           'height':"1000",
            'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
     )
 
@@ -431,8 +436,21 @@ def clean_data(com_port):
     com_port="COM" + com_port
     return
 
+#Enable Preset Settings
+@app.callback(
+    Output("pre-settings", 'disabled'),
+    [Input('address-set', 'value'),
+     Input('com-port', 'value'),
+     Input('acceleration-set', 'value'),
+     Input('baudrate', 'value')])
+def presetting_enable(address, com, accel_set, baud):
+    if (baud != '') and (accel_set != '') and (address != '') and (com != ''):
+        return False
+    else:
+        return True
 
-# Enable Preset Settings
+
+# Preset Settings
 @app.callback(
     Output("div-one", 'children'),
     [Input("pre-settings", 'value')],
@@ -531,12 +549,15 @@ def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_posit
 @app.callback(
     Output("speed-gauge", "value"),
     [Input("stepper-velocity", "value")],
-    [State("switch-velocity", "on")]
+    [State("switch-velocity", "on"),
+    State("step-size", 'value')]
 )
-def speed_gauge(stepper_velo, switch_velo):
+def speed_gauge(stepper_velo, switch_velo, step_size):
     if (switch_velo == True):
-        step_velo=int(stepper_velo/1000)
-        return step_velo
+        step_size = step_size * 200
+        stepper_velo = int(stepper_velo)
+        revolution = stepper_velo/step_size
+        return revolution
 
 # Position Knob Position
 @app.callback(
@@ -694,6 +715,14 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
+@app.callback(
+    Output("container", "style"),
+    [Input("color-return", "children")]
+)
+def color_picker(color):
+    style = {"background-color": ""}
+    style["background-color"] = color
+    return style
 
 # Mode
 @app.callback(
@@ -734,17 +763,19 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
         "---------------READ ME----------------\n" +
         "This Dash app was made for the Silverpak 17C stepper motor. " +
         "The motor driver has two modes: Position and Velocity. " +
-        "Position mode controls the absolute location of the motor. " +
-        "Velocity mode controls the speed of constant rotation of the motor. " +
-        "The user can only be in either Position or Velocity mode at one time.\n\n\n")
+        "Position mode: controls the absolute location of the motor. " +
+        "Velocity mode: controls the speed of constant rotation of the motor. " +
+        "The user can only be in EITHER Position or Velocity mode at ONE time.\n\n\n")
 
     instructions = (
         "------------INSTRUCTIONS------------\n" +
-        "1. Fill in input boxes and enable set. \n" +
-        "2. Click stop to flush serial. \n" +
-        "3. Enable position or velocity. \n" +
-        "4.1 Turn velocity and positon knobs in position mode.\n"
-        "4.2 Turn velocity knob in velocity mode.\n\n\n"
+        "1. Fill in input boxes (acceleration,port,etc). \n" +
+        "2. Enable the set switch. \n" +
+        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n" +
+        "4. Enable position OR velocity switch. \n" +
+        "5. If in position mode turn velocity knob and position knob." +
+        "6. If in velocity mode turn velocity knob.\n\n" +
+        "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. \n\n\n" +
         "-----------SERIAL RESPONSE---------\n")
 
     one = "Preset: {} \n".format(div_one)
