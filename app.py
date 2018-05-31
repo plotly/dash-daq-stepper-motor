@@ -222,7 +222,9 @@ app.layout = html.Div(
                         ),
                         html.H5("Motor Current",
                                 style={"textAlign": "Center",
-                                       "paddingTop": "2.5%", "marginBottom": "12%", "marginTop": "5%"}
+                                       "paddingTop": "2.5%", 
+                                       "marginBottom": "12%", 
+                                       "marginTop": "5%"}
                                 ),
                         html.Div(
                             [
@@ -281,7 +283,7 @@ app.layout = html.Div(
                             [
                                 daq.Slider(
                                     id='step-size',
-                                    value=4,
+                                    value=32,
                                     color="default",
                                     min=1,
                                     max=256,
@@ -331,7 +333,7 @@ app.layout = html.Div(
                                         dcc.Graph(
                                             id="position-gauge",
                                             className="six columns",
-                                            style={"marginLeft": "13%", "display": "flex",
+                                            style={"marginLeft": "20%", "display": "flex",
                                                    "justify-content": "right",
                                                    "align-items": "right"}
                                         )
@@ -340,23 +342,75 @@ app.layout = html.Div(
                                     style={"border-radius": "1px",
                                            "border-width": "5px",
                                            "border-top": "1px solid rgb(216, 216, 216)",
-                                           "marginBottom": "20%"
+                                           "marginBottom": "4%"
                                            }
                                 ),
+                                html.P(
+                                    "Velocity Mode",
+                                    style={"textAlign":"center"}
+                                    ),
+                                html.Div(
+                                    [
+
+
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                [
+                                                    html.Div(
+                                                        id="rotate-graph",
+                                                        style={
+                                                            "transform": "rotate(50deg)"
+                                                        },
+
+                                                        children=[
+                                                            html.H2(
+                                                                "|",
+                                                                style={
+                                                                    "width": "10px",
+                                                                    "height": "10px",
+                                                                    "background-color": "yellow"
+                                                                },
+
+
+                                                            ),
+
+                                                        ]
+                                                    )
+                                                ], style={"width": "10px",
+                                                          "height": "10px"}
+                                            )
+
+                                            ], style={"paddingLeft": "48%", "paddingTop": "25%", "paddingBottom": "45%", "border-radius": "5px"}
+                                        )
+                                    ], style={"border-width": "5px",
+                                              "border": "1px solid rgb(216, 216, 216)",
+                                              "border-radius":"5px",
+                                              "width": "29%",
+                                              "height": "10%",
+                                              "marginLeft":"34%",
+                                              "marginBottom":"6%"}
+                                ),
+
+                                
+                                        
+
+                                   
                                 html.Div(
                                     [
                                         daq.Gauge(
                                             id="speed-gauge",
                                             showCurrentValue=True,
                                             units="Revolutions/Second",
-                                            scale={"0": "Low",
-                                                   "5": "Medium", "10": "High"},
+                                            min = 0,
+                                            max = 7,
                                             value=0,
-                                            size=175,
+                                            size=150,
                                             color="#FF5E5E",
                                             label="Revolutions Per Second",
                                             className="twelve columns",
-                                            style={"marginTop": "10%",
+                                            style={"marginTop": "5%",
+                                                   "marginBottom":"-10%",
                                                    "color": "#222"}
                                         )
                                     ],
@@ -369,7 +423,8 @@ app.layout = html.Div(
                             ],
                             style={"border-radius": "5px",
                                    "border-width": "5px",
-                                   "border": "1px solid rgb(216, 216, 216)"
+                                   "border": "1px solid rgb(216, 216, 216)",
+                                   
                                    }
                         ),
                     ],
@@ -386,7 +441,14 @@ app.layout = html.Div(
                 html.Div(id="div-three"),
                 html.Div(id="div-four"),
                 html.Div(id="com-value"),
-                html.Div(id='color-return')
+                html.Div(id='color-return'),
+                html.Div(id="velocity-store"),
+                html.Div(id="zero-store"),
+                dcc.Interval(
+                    id='velocity-interval',
+                    interval=360000,
+                    n_intervals=0
+                )
             ],
             style={"visibility": "hidden"}
             )
@@ -398,7 +460,6 @@ app.layout = html.Div(
            "height": "1000",
            'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
     )
-
 
 # Global Variables Comport (optional)
 @app.callback(
@@ -516,8 +577,6 @@ def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_posit
         return response
 
 # Speed Gauge
-
-
 @app.callback(
     Output("speed-gauge", "value"),
     [Input("stepper-velocity", "value")],
@@ -530,7 +589,6 @@ def speed_gauge(stepper_velo, switch_velo, step_size):
         stepper_velo = int(stepper_velo)
         revolution = stepper_velo/step_size
         return revolution
-
 
 # Position Knob Position
 @app.callback(
@@ -561,7 +619,7 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
      Input("color-return", "children")]
 )
 def position_gauge(stepper_position, colorful):
-
+    
     trace = Scatterpolar(
 
         r=[0, 1],
@@ -574,8 +632,8 @@ def position_gauge(stepper_position, colorful):
     )
 
     layout = Layout(
-        width=250,
-        height=250,
+        width=200,
+        height=200,
         polar=dict(
             domain=dict(
                 x=[0, 1],
@@ -591,7 +649,7 @@ def position_gauge(stepper_position, colorful):
             l=0
         ),
 
-        title="Position",
+        title="Position Mode",
         font=dict(
             family='Arial, sans-serif;',
             size=10,
@@ -599,9 +657,43 @@ def position_gauge(stepper_position, colorful):
         ),
         showlegend=False
     )
-
     return Figure(data=[trace], layout=layout)
+#Velocity Figure
+@app.callback(
+    Output("velocity-interval", "interval"),
+    [Input("stepper-velocity", "value"),
+     Input("switch-velocity", "on")],
+    [State("switch-position", "on"),
+    State("step-size", "value")]
+)
+def velocity_figure(stepper_velo, switch_velo, switch_position, step_size):
+    if switch_velo == True and switch_position == False:
+    
+        step_size = step_size * 200
+        revolution = (stepper_velo/step_size) 
+        
+        if revolution > 7 or revolution == 0:
+            revolution = 360000000
+            return revolution
+        
+        revolution = 1/(revolution) * 250
+        return revolution
+    else: 
+        disable = 3600000
+        return disable
+#Rotate Graph
+@app.callback(
+    Output("rotate-graph", "style"),
+    [Input("velocity-interval", "n_intervals")]
+)
+def rotation(rotation):
+    rotation = rotation * 90
+    A = "rotate({}deg)".format(rotation)
 
+    style = {"transform": ""}
+    style["transform"] = A
+    print(style)
+    return style
 # Color Picker
 @app.callback(
     Output("step-size", "color"),
@@ -610,14 +702,12 @@ def position_gauge(stepper_position, colorful):
 def color_picker(color):
     return color['hex']
 
-
 @app.callback(
     Output("stepper-velocity", "color"),
     [Input("color-picker", "value")]
 )
 def color_picker(color):
     return color['hex']
-
 
 @app.callback(
     Output("stepper-position", "color"),
@@ -626,14 +716,12 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
-
 @app.callback(
     Output("switch-position", "color"),
     [Input("color-picker", "value")]
 )
 def color_picker(color):
     return color['hex']
-
 
 @app.callback(
     Output("switch-velocity", "color"),
@@ -658,7 +746,6 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
-
 @app.callback(
     Output("motor-current", "color"),
     [Input("color-picker", "value")]
@@ -666,14 +753,12 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
-
 @app.callback(
     Output("hold-current", "color"),
     [Input("color-picker", "value")]
 )
 def color_picker(color):
     return color['hex']
-
 
 @app.callback(
     Output("color-return", "children"),
@@ -711,7 +796,6 @@ def mode_set(switch_velo, switch_position):
     else:
         mode = "No Mode Set"
         return mode
-
 
 # Serial Monitor Response
 @app.callback(
@@ -760,7 +844,6 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
     response = read + instructions + one + two + three + four + reference
     return response
-
 
 if __name__ == '__main__':
 
