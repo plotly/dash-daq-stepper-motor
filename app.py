@@ -403,7 +403,7 @@ app.layout = html.Div(
                                             showCurrentValue=True,
                                             units="Revolutions/Second",
                                             min = 0,
-                                            max = 7,
+                                            max = 3,
                                             value=0,
                                             size=150,
                                             color="#FF5E5E",
@@ -672,7 +672,7 @@ def velocity_figure(stepper_velo, switch_velo, switch_position, step_size):
         step_size = step_size * 200
         revolution = (stepper_velo/step_size) 
         
-        if revolution > 7 or revolution == 0:
+        if revolution > 3 or revolution == 0:
             revolution = 360000000
             return revolution
         
@@ -827,7 +827,7 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
         "4. Enable position OR velocity switch. \n" +
         "5. If in position mode turn velocity knob and position knob. \n" +
         "6. If in velocity mode turn velocity knob.\n\n" +
-        "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. \n\n\n" +
+        "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. MAX REVOLUTION is 3 due to server restraints. \n\n\n" +
         "-----------SERIAL RESPONSE---------\n")
 
     one = "Preset: {} \n".format(div_one)
