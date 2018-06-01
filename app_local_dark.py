@@ -13,6 +13,16 @@ app = dash.Dash(__name__)
 server = app.server
 app.scripts.config.serve_locally = True
 
+def defaultset():
+    ser.bytesize = 8
+    ser.parity = 'N'
+    ser.stopbits = 1
+    ser.timeout = None
+    ser.xonxoff = 0
+    ser.rtscts = 0
+    ser.dsrdtr = False
+    ser.writeTimeout = 0
+
 # CSS Imports
 external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
                 "https://cdn.rawgit.com/plotly/dash-app-stylesheets/737dc4ab11f7a1a8d6b5645d26f69133d97062ae/dash-wind-streaming.css",
@@ -639,7 +649,6 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
         step_velocity = int(step_velocity)
         step_position = int(step_position)
         step_pos = int(step_position * (200*(step_size))/360)
-        print(step_pos)
         posvelo = "/{}V{}L{}A{}RR\r".format(address,
                                             step_velocity, acceleration, step_pos)
         ser.write(posvelo.encode("utf-8"))
@@ -912,7 +921,7 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
 if __name__ == '__main__':
     # Set COM Port Here:
-    #ser = serial.Serial('COM21')
-    #defaultset()
+    ser = serial.Serial('COM21')
+    defaultset()
 
     app.run_server(debug=False)

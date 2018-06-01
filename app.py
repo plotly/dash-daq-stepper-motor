@@ -814,11 +814,11 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
     instructions = (
         "------------INSTRUCTIONS------------\n" +
-        "1. Fill in input boxes (acceleration,port,etc). \n" +
-        "2. Enable the set switch. \n" +
-        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n" +
-        "4. Enable position OR velocity switch. \n" +
-        "5. If in position mode turn velocity knob and position knob. \n" +
+        "1. Fill in input boxes (acceleration,port,etc). \n\n" +
+        "2. Enable the set switch. \n\n" +
+        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n\n" +
+        "4. Enable position OR velocity switch. \n\n" +
+        "5. If in position mode turn velocity knob and position knob. \n\n" +
         "6. If in velocity mode turn velocity knob.\n\n" +
         "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. MAX REVOLUTION is 3 due to server restraints. \n\n\n" +
         "-----------SERIAL RESPONSE---------\n")
