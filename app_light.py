@@ -13,11 +13,13 @@ app = dash.Dash(__name__)
 server = app.server
 app.scripts.config.serve_locally = True
 
+
 # CSS Imports
 external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
                 "https://cdn.rawgit.com/plotly/dash-app-stylesheets/737dc4ab11f7a1a8d6b5645d26f69133d97062ae/dash-wind-streaming.css",
                 "https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i",
                 "https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i"]
+
 
 for css in external_css:
     app.css.append_css({"external_url": css})
@@ -301,7 +303,7 @@ app.layout = html.Div(
                                 daq.ColorPicker(
                                     id="color-picker",
                                     label="Color Picker",
-                                    value=dict(hex="#79A4F0"),
+                                    value=dict(hex="#000"),
                                     size=150,
                                     style={"border":"0px"}
                                 )
@@ -349,8 +351,6 @@ app.layout = html.Div(
                                     ),
                                 html.Div(
                                     [
-
-
                                         html.Div(
                                             [
                                                 html.Div(
@@ -369,10 +369,7 @@ app.layout = html.Div(
                                                                     "height": "10px",
                                                                     "background-color": "yellow"
                                                                 },
-
-
                                                             ),
-
                                                         ]
                                                     )
                                                 ], style={"width": "10px",
@@ -388,7 +385,7 @@ app.layout = html.Div(
                                               "height": "10%",
                                               "marginLeft":"34%",
                                               "marginBottom":"6%"}
-                                ),                                       
+                                ),     
                                 html.Div(
                                     [
                                         daq.Gauge(
@@ -404,7 +401,7 @@ app.layout = html.Div(
                                             className="twelve columns",
                                             style={"marginTop": "5%",
                                                    "marginBottom":"-10%",
-                                                   "color": "#FFF"}
+                                                   "color": "#222"}
                                         )
                                     ],
                                     className="row",
@@ -436,49 +433,22 @@ app.layout = html.Div(
                 html.Div(id="com-value"),
                 html.Div(id='color-return'),
                 html.Div(id="velocity-store"),
-                html.Div(id="zero-store"),
                 dcc.Interval(
                     id='velocity-interval',
                     interval=360000,
                     n_intervals=0
-                ),
-
-                daq.DarkThemeProvider
-                (
-                    [
-                        html.Link(
-                        href="https://codepen.io/anon/pen/BYEPbO.css",
-                        rel="stylesheet"
-                    ),
-                    html.Div(
-                        [
-                            html.Div(
-                                [
-                                html.H2('Controls'),
-                                ], style={'width': '80%'})
-                            ],
-                                    style={
-                                    'width': '100%',
-                            'display': 'flex',
-                            'flexDirection': 'column',
-                            'alignItems': 'center',
-                            'justifyContent': 'center'
-                    })
-]),
-
+                )
             ],
             style={"visibility": "hidden"}
             )
-
-   ],
-    style = {'padding': '0px 10px 0px 10px',
+   ], 
+    style={'padding': '0px 10px 10px 10px',
            'marginLeft': 'auto', 
            'marginRight': 'auto', 
            "width": "1100", 
-           'height':"1000",
+           "height": "1000",
            'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
     )
-
 
 # Global Variables Comport (optional)
 @app.callback(
@@ -629,6 +599,7 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
     else:
         response = "Set velocity and position knobs. Enable position."
         return response
+
 # Position Gauge
 @app.callback(
     Output("position-gauge", "figure"),
@@ -642,14 +613,13 @@ def position_gauge(stepper_position, colorful, switch_position, switch_velocity)
         stepper_position = stepper_position
     else:
         stepper_position = 0 
+    trace = Scatterpolar(
 
-    trace=Scatterpolar(
-
-        r = [0, 1],
-        theta = [0, stepper_position],
-        mode = 'lines',
-        name = 'Figure',
-        line = dict(
+        r=[0, 1],
+        theta=[0, stepper_position],
+        mode='lines',
+        name='Figure',
+        line=dict(
             color=colorful,
         )
     )
@@ -660,14 +630,10 @@ def position_gauge(stepper_position, colorful, switch_position, switch_velocity)
         polar=dict(
             domain=dict(
                 x=[0, 1],
-                y=[0, 1],
-                
+                y=[0, 1]
             ),
-        bgcolor="#FFF"
+
         ),
-        radialaxis = dict(
-        gridcolor = "white"
-      ),
 
         margin=Margin(
             t=80,
@@ -680,11 +646,9 @@ def position_gauge(stepper_position, colorful, switch_position, switch_velocity)
         font=dict(
             family='Arial, sans-serif;',
             size=10,
-            color="#FFF"
+            color="#000"
         ),
-        showlegend=False,
-        paper_bgcolor = "#000"
-
+        showlegend=False
     )
     return Figure(data=[trace], layout=layout)
 #Velocity Figure
@@ -718,8 +682,10 @@ def velocity_figure(stepper_velo, switch_velo, switch_position, step_size):
 def rotation(rotation):
     rotation = rotation * 90
     A = "rotate({}deg)".format(rotation)
+
     style = {"transform": ""}
     style["transform"] = A
+    print(style)
     return style
 # Color Picker
 @app.callback(
@@ -848,11 +814,11 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
     instructions = (
         "------------INSTRUCTIONS------------\n" +
-        "1. Fill in input boxes (acceleration,port,etc). \n" +
-        "2. Enable the set switch. \n" +
-        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n" +
-        "4. Enable position OR velocity switch. \n" +
-        "5. If in position mode turn velocity knob and position knob. \n" +
+        "1. Fill in input boxes (acceleration,port,etc). \n\n" +
+        "2. Enable the set switch. \n\n" +
+        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n\n" +
+        "4. Enable position OR velocity switch. \n\n" +
+        "5. If in position mode turn velocity knob and position knob. \n\n" +
         "6. If in velocity mode turn velocity knob.\n\n" +
         "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. MAX REVOLUTION is 3 due to server restraints. \n\n\n" +
         "-----------SERIAL RESPONSE---------\n")
