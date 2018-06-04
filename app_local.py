@@ -475,6 +475,7 @@ app.layout = html.Div(
      Input('com-port', 'value'),
      Input('acceleration-set', 'value'),
      Input('baudrate', 'value')])
+     
 def presetting_enable(address, com, accel_set, baud):
     if (baud != '') and (accel_set != '') and (address != '') and (com != ''):
         return False
@@ -529,6 +530,7 @@ def presetting_enable_power(preset_switch, address, accel_set, baud, com):
     Output("div-two", 'children'),
     [Input("start-stop", "n_clicks")]
     )
+
 def start_terminate(stop):
     if stop >= 1:
         ser.flush()
@@ -571,6 +573,7 @@ def enable_position(stop):
      State("acceleration-set", "value"),
      State("switch-position", "on")]
      )
+
 def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_position):
 
     if (switch_velo == True):
@@ -594,6 +597,7 @@ def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_posit
     [State("switch-velocity", "on"),
     State("step-size", 'value')]
 )
+
 def speed_gauge(stepper_velo, switch_velo, step_size):
     if (switch_velo == True):
         step_size = step_size * 200
@@ -612,6 +616,7 @@ def speed_gauge(stepper_velo, switch_velo, step_size):
      State("stepper-velocity", "value"),
      State("step-size", 'value')]
 )
+
 def position_mode(switch_position, step_position, address, acceleration, step_velocity, step_size):
 
     if (switch_position == True):
@@ -724,6 +729,7 @@ def rotation(rotation):
     Output("step-size", "color"),
     [Input("color-picker", "value")]
 )
+
 def color_picker(color):
     return color['hex']
 
