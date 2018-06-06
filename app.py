@@ -12,6 +12,7 @@ app = dash.Dash(__name__)
 
 server = app.server
 app.scripts.config.serve_locally = True
+app.config['suppress_callback_exceptions'] = True
 
 
 # CSS Imports
@@ -24,7 +25,30 @@ external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
 for css in external_css:
     app.css.append_css({"external_url": css})
 
-app.layout = html.Div(
+root_layout = html.Div(
+    [
+    dcc.Location(id='url', refresh=False),
+
+    html.Div([
+        daq.ToggleSwitch(
+            id='toggleTheme',
+            style={
+                'position': 'absolute',
+                'transform': 'translate(-50%, 20%)'
+            },
+            size=25
+        ),
+    ], id="toggleDiv",
+             style={
+                 'width': 'fit-content',
+                 'margin': '0 auto'
+             }),
+
+    html.Div(id='page-content'),
+]
+)
+
+light_layout = html.Div(
    [
         html.Div(
             id="container",
@@ -449,6 +473,743 @@ app.layout = html.Div(
            'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
     )
 
+dark_layout = html.Div(
+    [
+        html.Div(
+            id="container",
+            style={"background-color": "#0A2087"},
+
+            children=[
+                html.H2(
+                    "Dash DAQ: Blinkstick Control Panel",
+                ),
+                html.A(
+                    html.Img(
+                        src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/excel/dash-daq/dash-daq-logo-by-plotly-stripe+copy.png",
+                    ),
+                    href="http://www.dashdaq.io"
+                )
+
+            ],
+            className="banner"
+        ),
+        html.Div(
+            [
+                html.H2(
+                    "LED PANEL",
+                    id="LED-PANEL",
+                    style={
+                        "textAlign": "center",
+                        "marginTop": "5%",
+                        "color": ""
+                    }
+                ),
+                html.Br(),
+            ]
+        ),
+        html.Div(
+            [
+
+                daq.Indicator(
+                    id="led-1",
+                    label="Led 1",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-2",
+                    label="Led 2",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-3",
+                    label="Led 3",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-4",
+                    label="Led 4",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-5",
+                    label="Led 5",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-6",
+                    label="Led 6",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-7",
+                    label="Led 7",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                ),
+                daq.Indicator(
+                    id="led-8",
+                    label="Led 8",
+                    labelPosition="bottom",
+                    value=True,
+                    className="one columns",
+                    style={"textAlign": "center", "width": "1%"},
+                    color="#FFF"
+                )
+
+            ], className="row",
+            style={"display": "flex",
+                   "justify-content": "center",
+                   "align-items": "center",
+                   }
+        ),
+        html.Br(),
+        html.Div(
+            [
+
+                daq.PowerButton(
+                    id="power",
+                    label="On/Off",
+                    labelPosition="top",
+                    on=False,
+                    className="one columns",
+                    style={"width": "8%",
+                           "paddingBottom": "1%"},
+                    color=''
+                ),
+                daq.NumericInput(
+                    id="led-select",
+                    label="Led Select",
+                    className="one columns",
+                    style={"width": "5%",
+                           "textAlign": "center",
+                           "marginLeft": "3%",
+                           "paddingBottom": "1%"},
+                    value=0
+                ),
+                daq.BooleanSwitch(
+                    id='all-switch',
+                    on=False,
+                    label="All",
+                    vertical=True,
+                    labelPosition="top",
+                    className="one columns",
+                    style={"width": "3%"},
+                    color=''
+                ),
+                daq.BooleanSwitch(
+                    id='rainbow-switch',
+                    on=False,
+                    label="Rainbow",
+                    vertical=True,
+                    labelPosition="top",
+                    className="one columns",
+                    style={"width": "6%"},
+                    color=''
+                ),
+                html.Div(
+                    [
+                        daq.ColorPicker(
+                            id="color-picker",
+                            size=164,
+                            value={'rgb': {'r': 255, 'g': 255, 'b': 255}},
+                            label="Color Picker",
+                            style={"textAlign": "right"}
+                        )
+                    ], className="two columns",
+                    style={
+                        "width": "18.333%"
+                    }
+                )
+
+
+            ], className="row",
+            style={"display": "flex",
+                   "justify-content": "center",
+                   "align-items": "center",
+                   }
+        ),
+        html.Br(),
+        html.P(
+            "LED Slider",
+            style={
+                "textAlign": "left",
+                "marginBottom": "1%",
+                "paddingLeft": "11.5%"}
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        dcc.Slider(
+                            id="led-slide",
+                            min=0,
+                            max=8,
+                            marks={
+                                0: {'label': 'OFF'},
+                                1: {'label': '1'},
+                                2: {'label': '2'},
+                                3: {'label': '3'},
+                                4: {'label': '4'},
+                                5: {'label': '5'},
+                                6: {'label': '6'},
+                                7: {'label': '7'},
+                                8: {'label': '8'}
+                            },
+                            value=0
+                        )
+                    ], className="row",
+                    style={"width": "75%"}
+                )
+            ], style={"display": "flex",
+                      "justify-content": "center",
+                      "align-items": "center",
+                      }
+        ),
+
+        html.Div(
+            [
+                html.Div(id="color-send"),
+                html.Div(id="color-individual"),
+                html.Div(id="color-off"),
+                html.Div(id="color-rainbow"),
+                html.Div(id="color-slide"),
+                html.Div(id="color-one"),
+                html.Div(id="color-two"),
+                html.Div(id="color-return"),
+                daq.DarkThemeProvider([
+                    html.Link(
+                        href="https://codepen.io/anon/pen/BYEPbO.css",
+                        rel="stylesheet"
+                    ),
+                    html.Div([
+                        html.Div([
+                            html.H2(''),
+                        ], style={'width': '80%'})
+                    ],
+                        style={
+                        'width': '100%',
+                        'display': 'flex',
+                        'flexDirection': 'column',
+                        'alignItems': 'center',
+                        'justifyContent': 'center'
+                    })
+                ])
+            ],
+            style={"visibility": "hidden"}
+        )
+    ],
+    style={'padding': '0px 10px 10px 10px',
+           'marginLeft': 'auto',
+           'marginRight': 'auto',
+           "width": "850",
+           "height": "685",
+           'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
+)
+
+dark_layout = html.Div(
+   [
+        html.Div(
+            id="container",
+            style={"background-color": "#20304C"},
+
+            children=[
+                html.H2(
+                    "Dash DAQ: Stepper Motor Control Panel",
+                ),
+                html.A(
+                html.Img(
+                    src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/excel/dash-daq/dash-daq-logo-by-plotly-stripe+copy.png",
+                ),
+                href="http://www.dashdaq.io"
+                )
+            
+        ],
+        className="banner"
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.H3(
+                                    "Serial Monitor",
+                                    style={"textAlign": "Center"},
+                                    className="seven columns"
+                                ),
+                                daq.StopButton(
+                                    id="start-stop",
+                                    label="",
+                                    className="five columns",
+                                    n_clicks=0,
+                                    style={"paddingTop": "3%",
+                                           "display": "flex",
+                                           "justify-content": "center",
+                                           "align-items": "center"}
+                                )
+                            ],
+                            className="row"
+                        ),
+                        html.Div(
+                            [
+                                dcc.Textarea(
+                                    id="serial-response",
+                                    placeholder='',
+                                    value='',
+                                    style={'width': '90%',
+                                           'height': '500%'},
+                                    disabled=True,
+                                    rows=15,
+                                ),
+                            ],
+                            style={"display": "flex",
+                                   "justify-content": "center",
+                                   "align-items": "center"}
+                        ),
+                        html.Br(),
+                        html.Div(
+                            id="mode-set",
+                            children=[
+                                html.H5(id='word',
+                                        style={"textAlign": "center"})
+                            ]
+                        ),
+                        html.Div(
+                            [
+                                daq.Knob(
+                                    id="stepper-velocity",
+                                    label="Velocity (Steps)",
+                                    color="default",
+                                    max=51200,
+                                    min=0,
+                                    value=0,
+                                    size=75,
+                                    scale={"interval": 12800},
+                                    className="three columns",
+                                    style={"marginLeft": "17%",
+                                           "textAlign": "center"}
+                                ),
+                                daq.Knob(
+                                    id="stepper-position",
+                                    label="Position (Degree)",
+                                    color="default",
+                                    max=360,
+                                    min=0,
+                                    value=0,
+                                    size=75,
+                                    scale={"interval": 90},
+                                    className="three columns",
+                                    style={"marginLeft": "15%",
+                                           "textAlign": "center"}
+                                ),
+
+                                daq.BooleanSwitch(
+                                    id='switch-position',
+                                    on=False,
+                                    label="Position",
+                                    vertical=True,
+                                    labelPosition="top",
+                                    disabled=True,
+                                    color="default",
+                                    className='two columns',
+                                    style={"textAlign": "center"}
+                                ),
+
+                                daq.BooleanSwitch(
+                                    id='switch-velocity',
+                                    on=False,
+                                    label="Velocity",
+                                    vertical=True,
+                                    color="default",
+                                    labelPosition="top",
+                                    disabled=True,
+                                    className='two columns',
+                                    style={"textAlign": "center",
+                                           "paddingTop": "10%"}
+                                )
+                            ],
+                            className="row"
+                        )
+                    ],
+                    className="four columns",
+                    style={"border-radius": "5px",
+                           "border-width": "5px",
+                           "border": "1px solid rgb(216, 216, 216)"
+                           }
+                ),
+                html.Div(
+                    [
+                        html.H3(
+                            "Start Settings",
+                            style={"textAlign": "Center", "paddingBottom": "4.5%", "border-radius": "1px",
+                                   "border-width": "5px",
+                                   "border-bottom": "1px solid rgb(216, 216, 216)"
+                                   }
+                        ),
+                        daq.ToggleSwitch(
+                            id="pre-settings",
+                            label=["Not Set", "Set"],
+                            color="#FF5E5E",
+                            size=32,
+                            value=False,
+                            style={"marginBottom": "1%",
+                                   "paddingTop": "2%"}
+                        ),
+                        html.Div(
+                            [
+                                dcc.Input(
+                                    id='acceleration-set',
+                                    placeholder='Acceleration',
+                                    type='text',
+                                    value='',
+                                    className='six columns',
+                                    style={"width": "35%",
+                                           "marginLeft": "13.87%", "marginTop": "3%"}
+                                ),
+                                dcc.Input(
+                                    id='address-set',
+                                    placeholder='Address',
+                                    type='text',
+                                    value='',
+                                    className='six columns',
+                                    maxlength="1",
+                                    style={"width": "35%",
+                                           "marginTop": "3%"}
+                                ),
+                            ],
+                            className="row"
+                        ),
+                        html.Div(
+                            [
+                                dcc.Input(
+                                    id='baudrate',
+                                    placeholder='Baudrate',
+                                    type='text',
+                                    value='',
+                                    className='six columns',
+                                    style={"width": "35%",
+                                           "marginLeft": "13.87%", "marginTop": "3%"}
+                                ),
+                                dcc.Input(
+                                    id='com-port',
+                                    placeholder='Port',
+                                    type='text',
+                                    value='',
+                                    className='six columns',
+                                    style={"width": "35%",
+                                           "marginTop": "3%"}
+                                ),
+                            ],
+                            className="row"
+                        ),
+                        html.H5("Motor Current",
+                                style={"textAlign": "Center",
+                                       "paddingTop": "2.5%", 
+                                       "marginBottom": "12%", 
+                                       "marginTop": "5%"}
+                                ),
+                        html.Div(
+                            [
+                                daq.Slider(
+                                    id='motor-current',
+                                    value=30,
+                                    color="default",
+                                    min=0,
+                                    max=100,
+                                    size=250,
+                                    step=None,
+                                    handleLabel={
+                                        "showCurrentValue": 'True', "label": "VALUE"},
+                                    marks={"0": "0", "10": '', "20": '', "30": "", "40": "",
+                                           "50": "50", "60": "", "70": "", "80": "", "90": "", "100": "100"},
+                                    targets={"80": {"showCurrentValue": "False",
+                                                    "label": "WARNING", "color": "#685"}, "100": ""}
+                                )
+                            ],
+                            style={"display": "flex",
+                                   "justify-content": "center",
+                                   "align-items": "center", "marginBottom": "12%"}
+                        ),
+                        html.H5(
+                            "Hold Current",
+                            style={"textAlign": "center",
+                                   "marginBottom": "12%"}
+                        ),
+                        html.Div(
+                            [
+                                daq.Slider(
+                                    id='hold-current',
+                                    color="default",
+                                    value=20,
+                                    min=0,
+                                    max=100,
+                                    size=250,
+                                    step=None,
+                                    handleLabel={
+                                        "showCurrentValue": 'True', "label": "VALUE"},
+                                    marks={"0": "0", "10": '', "20": '', "30": "", "40": "",
+                                           "50": "50", "60": "", "70": "", "80": "", "90": "", "100": "100"},
+                                    targets={"80": {"showCurrentValue": "False",
+                                                    "label": "WARNING", "color": "#685"}, "100": ""})
+                            ],
+                            style={"display": "flex",
+                                   "justify-content": "center",
+                                   "align-items": "center", "marginBottom": "12%"}
+                        ),
+                        html.H5(
+                            "Step Size",
+                            style={"textAlign": "Center",
+                        "marginBottom": "12%"}
+                        ),
+                        html.Div(
+                            [
+                                daq.Slider(
+                                    id='step-size',
+                                    value=64,
+                                    color="default",
+                                    min=1,
+                                    max=256,
+                                    size=250,
+                                    step=None,
+                                    handleLabel={
+                                        "showCurrentValue": 'True', "label": "VALUE"},
+                                    marks={"1": "1", "2": '', "4": '', "8": "", "16": "",
+                                           "32": "", "64": "", "128": "128", "256": "256"})
+                            ],
+                            style={"display": "flex",
+                                   "justify-content": "center",
+                                   "align-items": "center", "marginBottom": "12%"}
+                        ),
+                        html.Div(
+                            [
+                                daq.ColorPicker(
+                                    id="color-picker",
+                                    label="Color Picker",
+                                    value=dict(hex="#79A4F0"),
+                                    size=150
+                                )
+                            ],
+                            style={"border-radius": "1px",
+                                   "border-width": "5px",
+                                   "border-top": "1px solid rgb(216, 216, 216)",
+                                   "paddingTop": "5%", "paddingBottom": "5%"
+                                   }
+                        )
+                    ], 
+                    className="four columns", 
+                    style={"border-radius": "5px",
+                           "border-width": "5px",
+                           "border": "1px solid rgb(216, 216, 216)"
+                    }
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.H3(
+                                    "Gauges",
+                                    style={"textAlign": "center"}),
+                                html.Div(
+                                    [
+                                        dcc.Graph(
+                                            id="dark-position-gauge",
+                                            className="six columns",
+                                            style={"marginLeft": "20%", "display": "flex",
+                                                   "justify-content": "right",
+                                                   "align-items": "right"}
+                                        )
+                                    ],
+                                    className="row",
+                                    style={"border-radius": "1px",
+                                           "border-width": "5px",
+                                           "border-top": "1px solid rgb(216, 216, 216)",
+                                           "marginBottom": "4%"
+                                           }
+                                ),
+                                html.P(
+                                    "Velocity Mode",
+                                    style={"textAlign":"center"}
+                                    ),
+                                html.Div(
+                                    [
+
+
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                [
+                                                    html.Div(
+                                                        id="rotate-graph",
+                                                        style={
+                                                            "transform": "rotate(50deg)"
+                                                        },
+
+                                                        children=[
+                                                            html.H2(
+                                                                "|",
+                                                                style={
+                                                                    "width": "10px",
+                                                                    "height": "10px",
+                                                                    "background-color": "yellow"
+                                                                },
+
+
+                                                            ),
+
+                                                        ]
+                                                    )
+                                                ], style={"width": "10px",
+                                                          "height": "10px"}
+                                            )
+
+                                            ], style={"paddingLeft": "48%", "paddingTop": "25%", "paddingBottom": "45%", "border-radius": "5px"}
+                                        )
+                                    ], style={"border-width": "5px",
+                                              "border": "1px solid rgb(216, 216, 216)",
+                                              "border-radius":"5px",
+                                              "width": "29%",
+                                              "height": "10%",
+                                              "marginLeft":"34%",
+                                              "marginBottom":"6%"}
+                                ),                                       
+                                html.Div(
+                                    [
+                                        daq.Gauge(
+                                            id="speed-gauge",
+                                            showCurrentValue=True,
+                                            units="Revolutions/Second",
+                                            min = 0,
+                                            max = 3,
+                                            value=0,
+                                            size=150,
+                                            color="#FF5E5E",
+                                            label="Revolutions Per Second (Max 3 RPS)",
+                                            className="twelve columns",
+                                            style={"marginTop": "5%",
+                                                   "marginBottom":"-10%",
+                                                   "color": "#FFF"}
+                                        )
+                                    ],
+                                    className="row",
+                                    style={"border-radius": "1px",
+                                           "border-width": "5px",
+                                           "border-top": "1px solid rgb(216, 216, 216)"
+                                           }
+                                )
+                            ],
+                            style={"border-radius": "5px",
+                                   "border-width": "5px",
+                                   "border": "1px solid rgb(216, 216, 216)",
+                                   
+                                   }
+                        ),
+                    ],
+                    className="four columns"
+                ),
+            ], 
+            className="row"
+        ),
+        # Placeholder Divs
+        html.Div(
+            [
+                html.Div(id="div-one"),
+                html.Div(id="div-two"),
+                html.Div(id="div-three"),
+                html.Div(id="div-four"),
+                html.Div(id="com-value"),
+                html.Div(id='color-return'),
+                html.Div(id="velocity-store"),
+                html.Div(id="zero-store"),
+                dcc.Interval(
+                    id='velocity-interval',
+                    interval=360000,
+                    n_intervals=0
+                ),
+                daq.DarkThemeProvider
+                (
+                    [
+                        html.Link(
+                        href="https://codepen.io/anon/pen/BYEPbO.css",
+                        rel="stylesheet"
+                    ),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                html.H2('Control'),
+                                ], style={'width': '80%'})
+                            ],
+                                    style={
+                                    'width': '100%',
+                            'display': 'flex',
+                            'flexDirection': 'column',
+                            'alignItems': 'center',
+                            'justifyContent': 'center'
+                    }
+                )
+            ]
+        ),
+            ],
+            style={"visibility": "hidden"}
+            )
+
+   ],
+    style = {'padding': '0px 10px 0px 10px',
+           'marginLeft': 'auto', 
+           'marginRight': 'auto', 
+           "width": "1100", 
+           'height':"1000",
+           'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
+    )
+
+app.layout = root_layout
+
+
+@app.callback(Output('toggleTheme', 'value'),
+              [Input('url', 'pathname')])
+def display_page(pathname):
+    
+    if pathname == '/dark':
+        return True
+    else:
+        return False
+
+
+@app.callback(Output('page-content', 'children'),
+              [Input('toggleTheme', 'value')])
+def page_layout(value):
+    if value:
+        return dark_layout
+    else:
+        return light_layout
+
 # Global Variables Comport (optional)
 @app.callback(
     Output('com-value', 'children'),
@@ -648,6 +1409,65 @@ def position_gauge(stepper_position, colorful, switch_position, switch_velocity)
             color="#000"
         ),
         showlegend=False
+    )
+    return Figure(data=[trace], layout=layout)
+
+# Position Gauge
+@app.callback(
+    Output("dark-position-gauge", "figure"),
+    [Input("stepper-position", "value"),
+     Input("color-return", "children")],
+     [State("switch-position", "on"),
+      State("switch-velocity", "on")]
+)
+def position_gauge(stepper_position, colorful, switch_position, switch_velocity):
+    if switch_position == True and switch_velocity == False:
+        stepper_position = stepper_position
+    else:
+        stepper_position = 0 
+
+    trace=Scatterpolar(
+
+        r = [0, 1],
+        theta = [0, stepper_position],
+        mode = 'lines',
+        name = 'Figure',
+        line = dict(
+            color=colorful,
+        )
+    )
+
+    layout = Layout(
+        width=200,
+        height=200,
+        polar=dict(
+            domain=dict(
+                x=[0, 1],
+                y=[0, 1],
+                
+            ),
+        bgcolor="#FFF"
+        ),
+        radialaxis = dict(
+        gridcolor = "white"
+      ),
+
+        margin=Margin(
+            t=80,
+            b=20,
+            r=0,
+            l=0
+        ),
+
+        title="Position Mode",
+        font=dict(
+            family='Arial, sans-serif;',
+            size=10,
+            color="#FFF"
+        ),
+        showlegend=False,
+        paper_bgcolor = "#000"
+
     )
     return Figure(data=[trace], layout=layout)
 #Velocity Figure
