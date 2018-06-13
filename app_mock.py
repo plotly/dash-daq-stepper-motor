@@ -493,7 +493,7 @@ light_layout = html.Div(
 dark_layout = DarkThemeProvider(
     [
         html.Link(
-            href="https://rawgit.com/matthewchan15/dash-css-style-sheets/master/dash-daq-dark.css",
+            href="https://cdn.rawgit.com/matthewchan15/dash-css-style-sheets/94fdb056/dash-daq-dark.css",
             rel="stylesheet"
         ),
         html.Div(
