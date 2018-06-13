@@ -5,6 +5,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_daq as daq
+from dash_daq import DarkThemeProvider as DarkThemeProvider
 from dash.dependencies import State, Input, Output
 
 
@@ -12,6 +13,11 @@ app = dash.Dash(__name__)
 
 server = app.server
 app.scripts.config.serve_locally = True
+app.config['suppress_callback_exceptions'] = True
+
+
+#Set COM Port Here:
+ser = serial.Serial("Port")
 
 def defaultset():
     ser.bytesize = 8
@@ -23,6 +29,7 @@ def defaultset():
     ser.dsrdtr = False
     ser.writeTimeout = 0
 
+
 # CSS Imports
 external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
                 "https://cdn.rawgit.com/plotly/dash-app-stylesheets/737dc4ab11f7a1a8d6b5645d26f69133d97062ae/dash-wind-streaming.css",
@@ -33,7 +40,32 @@ external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
 for css in external_css:
     app.css.append_css({"external_url": css})
 
-app.layout = html.Div(
+root_layout = html.Div(
+    [
+        dcc.Location(id='url', refresh=False),
+
+        html.Div(
+            [
+                daq.ToggleSwitch(
+                    id='toggleTheme',
+                    style={
+                        'position': 'absolute',
+                        'transform': 'translate(-50%, 20%)'
+                    },
+                    size=25
+                ),
+            ], id="toggleDiv",
+            style={
+                'width': 'fit-content',
+                'margin': '0 auto'
+            }
+        ),
+
+        html.Div(id='page-content'),
+    ]
+)
+
+light_layout = html.Div(
    [
         html.Div(
             id="container",
@@ -57,42 +89,42 @@ app.layout = html.Div(
             [
                 html.Div(
                     [
-                        html.Div(
-                            [
-                                html.H3(
-                                    "Serial Monitor",
-                                    style={"textAlign": "Center"},
-                                    className="seven columns"
-                                ),
-                                daq.StopButton(
-                                    id="start-stop",
-                                    label="",
-                                    className="five columns",
-                                    n_clicks=0,
-                                    style={"paddingTop": "3%",
-                                           "display": "flex",
-                                           "justify-content": "center",
-                                           "align-items": "center"}
-                                )
-                            ],
-                            className="row"
-                        ),
-                        html.Div(
-                            [
-                                dcc.Textarea(
-                                    id="serial-response",
-                                    placeholder='',
-                                    value='',
-                                    style={'width': '90%',
-                                           'height': '500%'},
-                                    disabled=True,
-                                    rows=15,
-                                ),
-                            ],
-                            style={"display": "flex",
-                                   "justify-content": "center",
-                                   "align-items": "center"}
-                        ),
+                    html.Div(
+                        [
+                            html.H3(
+                                "Serial Monitor",
+                                style={"textAlign": "Center"},
+                                className="seven columns"
+                            ),
+                            daq.StopButton(
+                                id="start-stop",
+                                label="",
+                                className="five columns",
+                                n_clicks=0,
+                                style={"paddingTop": "3%",
+                                        "display": "flex",
+                                        "justify-content": "center",
+                                        "align-items": "center"}
+                            )
+                        ],
+                        className="row"
+                    ),
+                    html.Div(
+                        [
+                            dcc.Textarea(
+                                id="serial-response",
+                                placeholder='',
+                                value='',
+                                style={'width': '90%',
+                                        'height': '500%'},
+                                disabled=True,
+                                rows=15,
+                            ),
+                        ],
+                        style={"display": "flex",
+                                "justify-content": "center",
+                                "align-items": "center"}
+                    ),
                         html.Br(),
                         html.Div(
                             id="mode-set",
@@ -250,7 +282,7 @@ app.layout = html.Div(
                                     marks={"0": "0", "10": '', "20": '', "30": "", "40": "",
                                            "50": "50", "60": "", "70": "", "80": "", "90": "", "100": "100"},
                                     targets={"80": {"showCurrentValue": "False",
-                                                    "label": "WARNING", "color": "#685"}, "100": ""}
+                                                    "label": "WARNING", "color": "#EA0606"}, "100": ""}
                                 )
                             ],
                             style={"display": "flex",
@@ -277,7 +309,7 @@ app.layout = html.Div(
                                     marks={"0": "0", "10": '', "20": '', "30": "", "40": "",
                                            "50": "50", "60": "", "70": "", "80": "", "90": "", "100": "100"},
                                     targets={"80": {"showCurrentValue": "False",
-                                                    "label": "WARNING", "color": "#685"}, "100": ""})
+                                                    "label": "WARNING", "color": "#EA0606"}, "100": ""})
                             ],
                             style={"display": "flex",
                                    "justify-content": "center",
@@ -292,7 +324,7 @@ app.layout = html.Div(
                             [
                                 daq.Slider(
                                     id='step-size',
-                                    value=32,
+                                    value=64,
                                     color="default",
                                     min=1,
                                     max=256,
@@ -401,11 +433,11 @@ app.layout = html.Div(
                                             showCurrentValue=True,
                                             units="Revolutions/Second",
                                             min = 0,
-                                            max = 10,
+                                            max = 3,
                                             value=0,
                                             size=150,
                                             color="#FF5E5E",
-                                            label="Revolutions Per Second",
+                                            label="Revolutions Per Second (Max 3 RPS)",
                                             className="twelve columns",
                                             style={"marginTop": "5%",
                                                    "marginBottom":"-10%",
@@ -441,7 +473,6 @@ app.layout = html.Div(
                 html.Div(id="com-value"),
                 html.Div(id='color-return'),
                 html.Div(id="velocity-store"),
-                html.Div(id="zero-store"),
                 dcc.Interval(
                     id='velocity-interval',
                     interval=360000,
@@ -459,7 +490,448 @@ app.layout = html.Div(
            'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
     )
 
-# Global Variables Comport (Use if want to use PySerial without global variable)
+dark_layout = DarkThemeProvider(
+    [
+        html.Link(
+            href="https://rawgit.com/matthewchan15/dash-css-style-sheets/master/dash-daq-dark.css",
+            rel="stylesheet"
+        ),
+        html.Div(
+            [
+                html.Div(
+                    id="container",
+                    style={"background-color": "#20304C"},
+
+                    children=[
+                        html.H2(
+                            "Dash DAQ: Stepper Motor Control Panel",
+                        ),
+                        html.A(
+                            html.Img(
+                                src="https://s3-us-west-1.amazonaws.com/plotly-tutorials/excel/dash-daq/dash-daq-logo-by-plotly-stripe+copy.png",
+                            ),
+                            href="http://www.dashdaq.io"
+                        )
+
+                    ],
+                    className="banner"
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.H3(
+                                            "Serial Monitor",
+                                            style={"textAlign": "Center"},
+                                            className="seven columns"
+                                        ),
+                                        daq.StopButton(
+                                            id="start-stop",
+                                            label="",
+                                            className="five columns",
+                                            n_clicks=0,
+                                            style={"paddingTop": "3%",
+                                                   "display": "flex",
+                                                   "justify-content": "center",
+                                                   "align-items": "center"}
+                                        )
+                                    ],
+                                    className="row"
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Textarea(
+                                            id="serial-response",
+                                            placeholder='',
+                                            value='',
+                                            style={'width': '90%',
+                                                   'height': '500%'},
+                                            disabled=True,
+                                            rows=15,
+                                        ),
+                                    ],
+                                    style={"display": "flex",
+                                           "justify-content": "center",
+                                           "align-items": "center"}
+                                ),
+                                html.Br(),
+                                html.Div(
+                                    id="mode-set",
+                                    children=[
+                                        html.H5(id='word',
+                                                style={"textAlign": "center"})
+                                    ]
+                                ),
+                                html.Div(
+                                    [
+                                        daq.Knob(
+                                            id="stepper-velocity",
+                                            label="Velocity (Steps)",
+                                            color="default",
+                                            max=51200,
+                                            min=0,
+                                            value=0,
+                                            size=75,
+                                            scale={"interval": 12800},
+                                            className="three columns",
+                                            style={"marginLeft": "17%",
+                                                   "textAlign": "center"}
+                                        ),
+                                        daq.Knob(
+                                            id="stepper-position",
+                                            label="Position (Degree)",
+                                            color="default",
+                                            max=360,
+                                            min=0,
+                                            value=0,
+                                            size=75,
+                                            scale={"interval": 90},
+                                            className="three columns",
+                                            style={"marginLeft": "15%",
+                                                   "textAlign": "center"}
+                                        ),
+
+                                        daq.BooleanSwitch(
+                                            id='switch-position',
+                                            on=False,
+                                            label="Position",
+                                            vertical=True,
+                                            labelPosition="top",
+                                            disabled=True,
+                                            color="default",
+                                            className='two columns',
+                                            style={"textAlign": "center"}
+                                        ),
+
+                                        daq.BooleanSwitch(
+                                            id='switch-velocity',
+                                            on=False,
+                                            label="Velocity",
+                                            vertical=True,
+                                            color="default",
+                                            labelPosition="top",
+                                            disabled=True,
+                                            className='two columns',
+                                            style={"textAlign": "center",
+                                                   "paddingTop": "10%"}
+                                        )
+                                    ],
+                                    className="row"
+                                )
+                            ],
+                            className="four columns",
+                            style={"border-radius": "5px",
+                                   "border-width": "5px",
+                                   "border": "1px solid rgb(216, 216, 216)"
+                                   }
+                        ),
+                        html.Div(
+                            [
+                                html.H3(
+                                    "Start Settings",
+                                    style={"textAlign": "Center", "paddingBottom": "4.5%", "border-radius": "1px",
+                                           "border-width": "5px",
+                                           "border-bottom": "1px solid rgb(216, 216, 216)"
+                                           }
+                                ),
+                                daq.ToggleSwitch(
+                                    id="pre-settings",
+                                    label=["Not Set", "Set"],
+                                    color="#FF5E5E",
+                                    size=32,
+                                    value=False,
+                                    style={"marginBottom": "1%",
+                                           "paddingTop": "2%"}
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Input(
+                                            id='acceleration-set',
+                                            placeholder='Acceleration',
+                                            type='text',
+                                            value='',
+                                            className='six columns',
+                                            style={"width": "35%",
+                                                   "marginLeft": "13.87%", "marginTop": "3%"}
+                                        ),
+                                        dcc.Input(
+                                            id='address-set',
+                                            placeholder='Address',
+                                            type='text',
+                                            value='',
+                                            className='six columns',
+                                            maxlength="1",
+                                            style={"width": "35%",
+                                                   "marginTop": "3%"}
+                                        ),
+                                    ],
+                                    className="row"
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Input(
+                                            id='baudrate',
+                                            placeholder='Baudrate',
+                                            type='text',
+                                            value='',
+                                            className='six columns',
+                                            style={"width": "35%",
+                                                   "marginLeft": "13.87%", "marginTop": "3%"}
+                                        ),
+                                        dcc.Input(
+                                            id='com-port',
+                                            placeholder='Port',
+                                            type='text',
+                                            value='',
+                                            className='six columns',
+                                            style={"width": "35%",
+                                                   "marginTop": "3%"}
+                                        ),
+                                    ],
+                                    className="row"
+                                ),
+                                html.H5("Motor Current",
+                                        style={"textAlign": "Center",
+                                               "paddingTop": "2.5%",
+                                               "marginBottom": "12%",
+                                               "marginTop": "5%"}
+                                        ),
+                                html.Div(
+                                    [
+                                        daq.Slider(
+                                            id='motor-current',
+                                            value=30,
+                                            color="default",
+                                            min=0,
+                                            max=100,
+                                            size=250,
+                                            step=None,
+                                            handleLabel={
+                                                "showCurrentValue": 'True', "label": "VALUE"},
+                                            marks={"0": "0", "10": '', "20": '', "30": "", "40": "",
+                                                   "50": "50", "60": "", "70": "", "80": "", "90": "", "100": "100"},
+                                            targets={"80": {"showCurrentValue": "False",
+                                                            "label": "WARNING", "color": "#EA0606"}, "100": ""}
+                                        )
+                                    ],
+                                    style={"display": "flex",
+                                           "justify-content": "center",
+                                           "align-items": "center", "marginBottom": "12%"}
+                                ),
+                                html.H5(
+                                    "Hold Current",
+                                    style={"textAlign": "center",
+                                           "marginBottom": "12%"}
+                                ),
+                                html.Div(
+                                    [
+                                        daq.Slider(
+                                            id='hold-current',
+                                            color="default",
+                                            value=20,
+                                            min=0,
+                                            max=100,
+                                            size=250,
+                                            step=None,
+                                            handleLabel={
+                                                "showCurrentValue": 'True', "label": "VALUE"},
+                                            marks={"0": "0", "10": '', "20": '', "30": "", "40": "",
+                                                   "50": "50", "60": "", "70": "", "80": "", "90": "", "100": "100"},
+                                            targets={"80": {"showCurrentValue": "False",
+                                                            "label": "WARNING", "color": "#EA0606"}, "100": ""})
+                                    ],
+                                    style={"display": "flex",
+                                           "justify-content": "center",
+                                           "align-items": "center", "marginBottom": "12%"}
+                                ),
+                                html.H5(
+                                    "Step Size",
+                                    style={"textAlign": "Center",
+                                           "marginBottom": "12%"}
+                                ),
+                                html.Div(
+                                    [
+                                        daq.Slider(
+                                            id='step-size',
+                                            value=64,
+                                            color="default",
+                                            min=1,
+                                            max=256,
+                                            size=250,
+                                            step=None,
+                                            handleLabel={
+                                                "showCurrentValue": 'True', "label": "VALUE"},
+                                            marks={"1": "1", "2": '', "4": '', "8": "", "16": "",
+                                                   "32": "", "64": "", "128": "128", "256": "256"})
+                                    ],
+                                    style={"display": "flex",
+                                           "justify-content": "center",
+                                           "align-items": "center", "marginBottom": "12%"}
+                                ),
+                                html.Div(
+                                    [
+                                        daq.ColorPicker(
+                                            id="color-picker",
+                                            label="Color Picker",
+                                            value=dict(hex="#79A4F0"),
+                                            size=150
+                                        )
+                                    ],
+                                    style={"border-radius": "1px",
+                                           "border-width": "5px",
+                                           "border-top": "1px solid rgb(216, 216, 216)",
+                                           "paddingTop": "5%", "paddingBottom": "5%"
+                                           }
+                                )
+                            ],
+                            className="four columns",
+                            style={"border-radius": "5px",
+                                   "border-width": "5px",
+                                   "border": "1px solid rgb(216, 216, 216)"
+                                   }
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.H3(
+                                            "Gauges",
+                                            style={"textAlign": "center"}),
+                                        html.Div(
+                                            [
+                                                dcc.Graph(
+                                                    id="dark-position-gauge",
+                                                    className="six columns",
+                                                    style={"marginLeft": "20%", "display": "flex",
+                                                           "justify-content": "right",
+                                                           "align-items": "right"}
+                                                )
+                                            ],
+                                            className="row",
+                                            style={"border-radius": "1px",
+                                                   "border-width": "5px",
+                                                   "border-top": "1px solid rgb(216, 216, 216)",
+                                                   "marginBottom": "4%"
+                                                   }
+                                        ),
+                                        html.P(
+                                            "Velocity Mode",
+                                            style={"textAlign": "center"}
+                                        ),
+                                        html.Div(
+                                            [
+
+
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            [
+                                                                html.Div(
+                                                                    id="rotate-graph",
+                                                                    style={
+                                                                        "transform": "rotate(50deg)"
+                                                                    },
+
+                                                                    children=[
+                                                                        html.H2(
+                                                                            "|",
+                                                                            style={
+                                                                                "width": "10px",
+                                                                                "height": "10px",
+                                                                                "background-color": "yellow"
+                                                                            },
+
+
+                                                                        ),
+
+                                                                    ]
+                                                                )
+                                                            ], style={"width": "10px",
+                                                                      "height": "10px"}
+                                                        )
+
+                                                    ], style={"paddingLeft": "48%", "paddingTop": "25%", "paddingBottom": "45%", "border-radius": "5px"}
+                                                )
+                                            ], style={"border-width": "5px",
+                                                      "border": "1px solid rgb(216, 216, 216)",
+                                                      "border-radius": "5px",
+                                                      "width": "29%",
+                                                      "height": "10%",
+                                                      "marginLeft": "34%",
+                                                      "marginBottom": "6%"}
+                                        ),
+                                        html.Div(
+                                            [
+                                                daq.Gauge(
+                                                    id="speed-gauge",
+                                                    showCurrentValue=True,
+                                                    units="Revolutions/Second",
+                                                    min=0,
+                                                    max=3,
+                                                    value=0,
+                                                    size=150,
+                                                    color="#FF5E5E",
+                                                    label="Revolutions Per Second (Max 3 RPS)",
+                                                    className="twelve columns",
+                                                    style={"marginTop": "5%",
+                                                           "marginBottom": "-10%",
+                                                           "color": "#FFF"}
+                                                )
+                                            ],
+                                            className="row",
+                                            style={"border-radius": "1px",
+                                                   "border-width": "5px",
+                                                   "border-top": "1px solid rgb(216, 216, 216)"
+                                                   }
+                                        )
+                                    ],
+                                    style={"border-radius": "5px",
+                                           "border-width": "5px",
+                                           "border": "1px solid rgb(216, 216, 216)",
+
+                                           }
+                                ),
+                            ],
+                            className="four columns"
+                        ),
+                    ],
+                    className="row"
+                ),
+                # Placeholder Divs
+                html.Div(
+                    [
+                        html.Div(id="div-one"),
+                        html.Div(id="div-two"),
+                        html.Div(id="div-three"),
+                        html.Div(id="div-four"),
+                        html.Div(id="com-value"),
+                        html.Div(id='color-return'),
+                        html.Div(id="velocity-store"),
+                        html.Div(id="zero-store"),
+                        dcc.Interval(
+                            id='velocity-interval',
+                            interval=360000,
+                            n_intervals=0
+                        ),
+                    ],
+                    style={"visibility": "hidden"}
+                )
+
+            ],
+            style={'padding': '0px 10px 0px 10px',
+                   'marginLeft': 'auto',
+                   'marginRight': 'auto',
+                   "width": "1100",
+                   'height': "1000",
+                   'boxShadow': '0px 0px 5px 5px rgba(204,204,204,0.4)'}
+        )
+    ]
+)
+app.layout = root_layout
+
+# Global Variables Comport (Use if want to use PySerial with global variable)
 # @app.callback(
 #     Output('Make new hidden div', 'children'),
 #     [Input('com-port', 'value')])
@@ -622,7 +1094,6 @@ def position_mode(switch_position, step_position, address, acceleration, step_ve
         step_velocity = int(step_velocity)
         step_position = int(step_position)
         step_pos = int(step_position * (200*(step_size))/360)
-        print(step_pos)
         posvelo = "/{}V{}L{}A{}RR\r".format(address, step_velocity, acceleration, step_pos)
         ser.write(posvelo.encode("utf-8"))
 
@@ -885,8 +1356,6 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
 
 if __name__ == '__main__':
-    #Set COM Port Here:
-    ser = serial.Serial('COM21')
     defaultset()
 
     app.run_server(debug=False)
