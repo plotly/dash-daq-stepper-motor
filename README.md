@@ -1,6 +1,6 @@
 # Dash-SilverPak17C-Stepper-Motor
 
-A mock app to control a Lin Engineering [SilverPak17C Stepper Motor](https://www.blinkstick.com/). [Play with the demo](https://dash-daq-stepper-motor.herokuapp.com/) and learn more about this application from our [blog entry](https://www.dashdaq.io/stepper-motor-control-in-python).
+A mock app to control a Lin Engineering [SilverPak17C Stepper Motor](https://www.linengineering.com/products/integrated_motors/silverpak-17c-2/). [Play with the demo](https://dash-daq-stepper-motor.herokuapp.com/) and learn more about this application from our [blog entry](https://www.dashdaq.io/stepper-motor-control-in-python).
 
 ---
 
