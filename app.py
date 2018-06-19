@@ -18,7 +18,7 @@ app.config['suppress_callback_exceptions'] = True
 
 # CSS Imports
 external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
-                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/737dc4ab11f7a1a8d6b5645d26f69133d97062ae/dash-wind-streaming.css",
+                "https://cdn.rawgit.com/matthewchan15/dash-css-style-sheets/adf070fa/banner.css",
                 "https://fonts.googleapis.com/css?family=Raleway:400,400i,700,700i",
                 "https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i"]
 
@@ -29,7 +29,6 @@ for css in external_css:
 root_layout = html.Div(
     [
         dcc.Location(id='url', refresh=False),
-
         html.Div(
             [
                 daq.ToggleSwitch(
@@ -46,7 +45,6 @@ root_layout = html.Div(
                 'margin': '0 auto'
             }
         ),
-
         html.Div(id='page-content'),
     ]
 )
@@ -761,7 +759,7 @@ dark_layout = DarkThemeProvider(
                                         daq.ColorPicker(
                                             id="color-picker",
                                             label="Color Picker",
-                                            value=dict(hex="#79A4F0"),
+                                            value=dict(hex="#119DFF"),
                                             size=150
                                         )
                                     ],
@@ -1219,6 +1217,7 @@ def velocity_figure(stepper_velo, switch_velo, switch_position, step_size):
     else: 
         disable = 3600000
         return disable
+        
 #Rotate Graph
 @app.callback(
     Output("rotate-graph", "style"),
