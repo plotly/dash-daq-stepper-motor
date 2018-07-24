@@ -36,8 +36,11 @@ There are two versions of this application. A mock version for the user to play 
 If you would like to run the **local version**, please ensure that the stepper motor voltage (12 VDC - 40 VDC) is being run to the stepper motor, the stepper motor is plugged into the [USB 485 converter card](https://www.linengineering.com/products/accessories/usb485/), and the USB 485 converter card is plugged into the PC. If this is your first time using the stepper motor you may need to install the drivers to use the USB 485 converter card. Instructions and the necessary files to install the driver can be found [here](http://www.linmotors.com/Accessories/USB485.aspx) under downloads. 
 
 When the drivers are properly installed you will see something like this highlighted port:
+
 ![changefail](screenshots/pcport.JPG)
 
+Open **app.py** and insert the **COM PORT/PATH** of the stepper motor where it is asked:
+![changefail](screenshots/connection.jpg)
 
 When the device is ready run in the command line:
 ``` 
