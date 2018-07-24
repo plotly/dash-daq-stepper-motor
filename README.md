@@ -33,9 +33,11 @@ and all of the required `pip` packages,  will be installed, and the app will be 
 There are two versions of this application. A mock version for the user to play with, without any instruments connected, and a local version, that can be connected to a device.
 
 ### Local Application
-If you would like to run the **local version**, please ensure the stepper motor is plugged into the USB 485 converter card, that the USB 485 converter card is plugged into the PC, and voltage (12 VDC - 40 VDC) is being run to the stepper motor. If this is your first time using the stepper motor you may need to install the drivers to use the USB 485 converter card. Instructions and the necessary files can be found [here](http://www.linmotors.com/Accessories/USB485.aspx) under downloads. 
+If you would like to run the **local version**, please ensure that the stepper motor voltage (12 VDC - 40 VDC) is being run to the stepper motor, the stepper motor is plugged into the [USB 485 converter card](https://www.linengineering.com/products/accessories/usb485/), and the USB 485 converter card is plugged into the PC. If this is your first time using the stepper motor you may need to install the drivers to use the USB 485 converter card. Instructions and the necessary files to install the driver can be found [here](http://www.linmotors.com/Accessories/USB485.aspx) under downloads. 
 
 When the drivers are properly installed you will see something like this highlighted port:
+![changefail](screenshots/pcport.JPG)
+
 
 When the device is ready run in the command line:
 ``` 
@@ -53,13 +55,15 @@ Open the web address given to you in your browser and the application will be re
 
 If the app is run, but the device is not connected you will see something like this:
 
-![changefail](screenshots/notplugedin.JPG)
+![changefail](screenshots/no_connection.JPG)
 
 Sometimes the application may freeze and hang due to the serial communication. You can fix this by:
-1. Unplugging all connections and plugging them back in
-2. Correct **COM PORT/PATH** is selected
-3. Proper voltage is applied to the motor (12 VDC - 40 VDC)
-4. The ground wire from the USB485, stepper motor, and power supply are connected
+1. Unpluging all connections and plugging them back in
+2. Checking to see if correct **COM PORT/PATH** is selected
+3. Ensuring proper voltage is applied to the motor (12 VDC - 40 VDC)
+4. Checking the ground wire from the USB485, stepper motor, and power supply are connected
+5. See if voltage is running to the stepper motor
+6. Reinstalling the drivers
 
 ### Mock Application
 If you would like to run the __**mock version**__, run in the command line:
