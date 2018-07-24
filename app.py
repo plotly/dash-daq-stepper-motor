@@ -16,6 +16,21 @@ app.scripts.config.serve_locally = True
 app.config['suppress_callback_exceptions'] = True
 
 
+#Set COM Port Here:
+ser = serial.Serial("COM21", timeout=5)
+ser.flush()
+
+def defaultset():
+    ser.bytesize = 8
+    ser.parity = 'N'
+    ser.stopbits = 1
+    ser.timeout = None
+    ser.xonxoff = 0
+    ser.rtscts = 0
+    ser.dsrdtr = False
+    ser.writeTimeout = 0
+
+
 # CSS Imports
 external_css = ["https://codepen.io/chriddyp/pen/bWLwgP.css",
                 "https://cdn.rawgit.com/matthewchan15/dash-css-style-sheets/adf070fa/banner.css",
@@ -29,6 +44,7 @@ for css in external_css:
 root_layout = html.Div(
     [
         dcc.Location(id='url', refresh=False),
+
         html.Div(
             [
                 daq.ToggleSwitch(
@@ -45,6 +61,7 @@ root_layout = html.Div(
                 'margin': '0 auto'
             }
         ),
+
         html.Div(id='page-content'),
     ]
 )
@@ -73,42 +90,42 @@ light_layout = html.Div(
             [
                 html.Div(
                     [
-                        html.Div(
-                            [
-                                html.H3(
-                                    "Serial Monitor",
-                                    style={"textAlign": "Center"},
-                                    className="seven columns"
-                                ),
-                                daq.StopButton(
-                                    id="start-stop",
-                                    label="",
-                                    className="five columns",
-                                    n_clicks=0,
-                                    style={"paddingTop": "3%",
-                                           "display": "flex",
-                                           "justify-content": "center",
-                                           "align-items": "center"}
-                                )
-                            ],
-                            className="row"
-                        ),
-                        html.Div(
-                            [
-                                dcc.Textarea(
-                                    id="serial-response",
-                                    placeholder='',
-                                    value='',
-                                    style={'width': '90%',
-                                           'height': '500%'},
-                                    disabled=True,
-                                    rows=15,
-                                ),
-                            ],
-                            style={"display": "flex",
-                                   "justify-content": "center",
-                                   "align-items": "center"}
-                        ),
+                    html.Div(
+                        [
+                            html.H3(
+                                "Serial Monitor",
+                                style={"textAlign": "Center"},
+                                className="seven columns"
+                            ),
+                            daq.StopButton(
+                                id="start-stop",
+                                label="",
+                                className="five columns",
+                                n_clicks=0,
+                                style={"paddingTop": "3%",
+                                        "display": "flex",
+                                        "justify-content": "center",
+                                        "align-items": "center"}
+                            )
+                        ],
+                        className="row"
+                    ),
+                    html.Div(
+                        [
+                            dcc.Textarea(
+                                id="serial-response",
+                                placeholder='',
+                                value='',
+                                style={'width': '90%',
+                                        'height': '500%'},
+                                disabled=True,
+                                rows=15,
+                            ),
+                        ],
+                        style={"display": "flex",
+                                "justify-content": "center",
+                                "align-items": "center"}
+                    ),
                         html.Br(),
                         html.Div(
                             id="mode-set",
@@ -915,7 +932,15 @@ dark_layout = DarkThemeProvider(
 )
 app.layout = root_layout
 
+# Global Variables Comport (Use if want to use PySerial with global variable)
+# @app.callback(
+#     Output('Make new hidden div', 'children'),
+#     [Input('com-port', 'value')])
+# def clean_data(com_port):
+#     com_port="COM" + com_port
+#     return
 
+# Dark Theme Provider
 @app.callback(Output('toggleTheme', 'value'),
               [Input('url', 'pathname')])
 def display_page(pathname):
@@ -934,25 +959,20 @@ def page_layout(value):
     else:
         return light_layout
 
-# Global Variables Comport (optional)
-@app.callback(
-    Output('com-value', 'children'),
-    [Input('com-port', 'value')])
-def clean_data(com_port):
-    com_port = "COM" + com_port
-    return
-# Enable Preset Settings
+#Enable Preset Settings
 @app.callback(
     Output("pre-settings", 'disabled'),
     [Input('address-set', 'value'),
      Input('com-port', 'value'),
      Input('acceleration-set', 'value'),
      Input('baudrate', 'value')])
+     
 def presetting_enable(address, com, accel_set, baud):
     if (baud != '') and (accel_set != '') and (address != '') and (com != ''):
         return False
     else:
         return True
+
 
 # Preset Settings
 @app.callback(
@@ -964,13 +984,21 @@ def presetting_enable(address, com, accel_set, baud):
      State('step-size', 'value'),
      State('acceleration-set', 'value'),
      State('baudrate', 'value')])
+
 def presetting_start(preset_switch, address, motor_current, hold_current, stepsize, accel_set, baud):
-    if (baud != '') and (accel_set != '') and (address != '') and (preset_switch == True):
-        response = "xff/0@"
+    if ((baud != '') and (accel_set != '') and (address != '') and (preset_switch == True)):
+
+        ser.baudrate = baud
+        command = "/{}m{}h{}j{}L{}RR\r".format(address, motor_current, hold_current, stepsize, accel_set)
+        ser.flush()
+        ser.write(command.encode("utf-8"))
+
+        response = str(ser.read(7))
         return response
     else:
         response = "Enable set. Set motor settings before using."
         return response
+
 
 # Preset Switch Disable Power Button
 @app.callback(
@@ -988,19 +1016,18 @@ def presetting_enable_power(preset_switch, address, accel_set, baud, com):
     else:
         return True
 
-# Stop Button Terminate
+# Stop Button Terminate 
 @app.callback(
     Output("div-two", 'children'),
     [Input("start-stop", "n_clicks")]
-)
-def start_terminate(stop):
-    stopchange = stop % 2
-    if stop >= 1:
-        if stopchange == 0:
-            response = "xff/0'"
-        else:
-            response = "xff/0B"
+    )
 
+def start_terminate(stop):
+    if stop >= 1:
+        ser.flush()
+        term = "/1TRR\r".encode('utf-8')
+        ser.write(term)
+        response = str(ser.read(7))
         return response
     else:
         response = 'Terminate commands and flush serial.'
@@ -1028,7 +1055,7 @@ def enable_position(stop):
     else:
         return True
 
-# Velocity Knob Position
+# Velocity Knob Position 
 @app.callback(
     Output("div-three", "children"),
     [Input("stepper-velocity", "value"),
@@ -1037,13 +1064,18 @@ def enable_position(stop):
      State("acceleration-set", "value"),
      State("switch-position", "on")]
      )
+
 def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_position):
+
     if (switch_velo == True):
         step_velo = int(stepper_velo)
+        velo = "/{}V{}L{}P0RR\r".format(address, step_velo, acceleration)
+        ser.write(velo.encode("utf-8"))
+
         if step_velo == 0 or step_velo == 5000:
-            response = "xff/0B"
+            response = str(ser.read(7))
         else:
-            response = 'Bring to 0 or 5000 for serial response.'
+            response = 'Bring to 0 or 5000 to see response.'
         return response
     else:
         response = 'Set velocity knob. Enable velocity.'
@@ -1054,14 +1086,16 @@ def velocity_mode(stepper_velo, switch_velo, address, acceleration, switch_posit
     Output("speed-gauge", "value"),
     [Input("stepper-velocity", "value")],
     [State("switch-velocity", "on"),
-     State("step-size", 'value')]
+    State("step-size", 'value')]
 )
+
 def speed_gauge(stepper_velo, switch_velo, step_size):
     if (switch_velo == True):
         step_size = step_size * 200
         stepper_velo = int(stepper_velo)
         revolution = stepper_velo/step_size
         return revolution
+
 
 # Position Knob Position
 @app.callback(
@@ -1070,13 +1104,22 @@ def speed_gauge(stepper_velo, switch_velo, step_size):
      Input("stepper-position", "value")],
     [State("address-set", "value"),
      State("acceleration-set", "value"),
-     State("stepper-velocity", "value")]
+     State("stepper-velocity", "value"),
+     State("step-size", 'value')]
 )
-def position_mode(switch_position, step_position, address, acceleration, step_velocity):
+
+def position_mode(switch_position, step_position, address, acceleration, step_velocity, step_size):
 
     if (switch_position == True):
+        step_velocity = int(step_velocity)
+        step_position = int(step_position)
+        step_pos = int(step_position * (200*(step_size))/360)
+        posvelo = "/{}V{}L{}A{}RR\r".format(address, step_velocity, acceleration, step_pos)
+        ser.write(posvelo.encode("utf-8"))
+
+
         if step_position == 0 or step_position == 360:
-            response = "xff/0@"
+            response = str(ser.read(7))
         else:
             response = "Bring to 0 or 360 for serial response."
         return response
@@ -1135,65 +1178,6 @@ def position_gauge(stepper_position, colorful, switch_position, switch_velocity)
         showlegend=False
     )
     return Figure(data=[trace], layout=layout)
-
-# Position Gauge
-@app.callback(
-    Output("dark-position-gauge", "figure"),
-    [Input("stepper-position", "value"),
-     Input("color-return", "children")],
-     [State("switch-position", "on"),
-      State("switch-velocity", "on")]
-)
-def position_gauge(stepper_position, colorful, switch_position, switch_velocity):
-    if switch_position == True and switch_velocity == False:
-        stepper_position = stepper_position
-    else:
-        stepper_position = 0 
-
-    trace=Scatterpolar(
-
-        r = [0, 1],
-        theta = [0, stepper_position],
-        mode = 'lines',
-        name = 'Figure',
-        line = dict(
-            color=colorful,
-        )
-    )
-
-    layout = Layout(
-        width=200,
-        height=200,
-        polar=dict(
-            domain=dict(
-                x=[0, 1],
-                y=[0, 1],
-                
-            ),
-        bgcolor="#FFF"
-        ),
-        radialaxis = dict(
-        gridcolor = "white"
-      ),
-
-        margin=Margin(
-            t=80,
-            b=20,
-            r=0,
-            l=0
-        ),
-
-        title="Position Mode",
-        font=dict(
-            family='Arial, sans-serif;',
-            size=10,
-            color="#FFF"
-        ),
-        showlegend=False,
-        paper_bgcolor = "#000"
-
-    )
-    return Figure(data=[trace], layout=layout)
 #Velocity Figure
 @app.callback(
     Output("velocity-interval", "interval"),
@@ -1208,7 +1192,7 @@ def velocity_figure(stepper_velo, switch_velo, switch_position, step_size):
         step_size = step_size * 200
         revolution = (stepper_velo/step_size) 
         
-        if revolution > 3 or revolution == 0:
+        if revolution > 7 or revolution == 0:
             revolution = 360000000
             return revolution
         
@@ -1217,7 +1201,6 @@ def velocity_figure(stepper_velo, switch_velo, switch_position, step_size):
     else: 
         disable = 3600000
         return disable
-        
 #Rotate Graph
 @app.callback(
     Output("rotate-graph", "style"),
@@ -1229,15 +1212,17 @@ def rotation(rotation):
 
     style = {"transform": ""}
     style["transform"] = A
-    print(style)
     return style
+
 # Color Picker
 @app.callback(
     Output("step-size", "color"),
     [Input("color-picker", "value")]
 )
+
 def color_picker(color):
     return color['hex']
+
 
 @app.callback(
     Output("stepper-velocity", "color"),
@@ -1246,6 +1231,7 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
+
 @app.callback(
     Output("stepper-position", "color"),
     [Input("color-picker", "value")]
@@ -1253,12 +1239,14 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
+
 @app.callback(
     Output("switch-position", "color"),
     [Input("color-picker", "value")]
 )
 def color_picker(color):
     return color['hex']
+
 
 @app.callback(
     Output("switch-velocity", "color"),
@@ -1283,6 +1271,7 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
+
 @app.callback(
     Output("motor-current", "color"),
     [Input("color-picker", "value")]
@@ -1290,12 +1279,14 @@ def color_picker(color):
 def color_picker(color):
     return color['hex']
 
+
 @app.callback(
     Output("hold-current", "color"),
     [Input("color-picker", "value")]
 )
 def color_picker(color):
     return color['hex']
+
 
 @app.callback(
     Output("color-return", "children"),
@@ -1358,13 +1349,13 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
 
     instructions = (
         "------------INSTRUCTIONS------------\n" +
-        "1. Fill in input boxes (acceleration,port,etc). \n\n" +
-        "2. Enable the set switch. \n\n" +
-        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n\n" +
-        "4. Enable position OR velocity switch. \n\n" +
-        "5. If in position mode turn velocity knob and position knob. \n\n" +
+        "1. Fill in input boxes (acceleration,port,etc). \n" +
+        "2. Enable the set switch. \n" +
+        "3. Now press the STOP button (beside serial monitor). This flushes port and enables velocity and position switchs. \n" +
+        "4. Enable position OR velocity switch. \n" +
+        "5. If in position mode turn velocity knob and position knob. \n" +
         "6. If in velocity mode turn velocity knob.\n\n" +
-        "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. MAX REVOLUTION is 3 due to server restraints. \n\n\n" +
+        "NOTE: Enable only ONE MODE at a TIME. Velocity in position mode is top speed. Velocity in velocity mode is real time speed. \n\n\n" +
         "-----------SERIAL RESPONSE---------\n")
 
     one = "Preset: {} \n".format(div_one)
@@ -1382,6 +1373,9 @@ def serial_monitor_response(div_one, div_two, div_three, div_four):
     response = read + instructions + one + two + three + four + reference
     return response
 
-if __name__ == '__main__':
 
-    app.run_server(debug=True)
+
+if __name__ == '__main__':
+    defaultset()
+
+    app.run_server(debug=False)
