@@ -40,7 +40,8 @@ When the drivers are properly installed you will see something like this highlig
 ![changefail](screenshots/pcport.JPG)
 
 Open **app.py** and insert the **COM PORT/PATH** of the stepper motor where it is asked:
-![changefail](screenshots/connection.jpg)
+
+![changefail](screenshots/connection.JPG)
 
 When the device is ready run in the command line:
 ``` 
