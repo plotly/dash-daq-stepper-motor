@@ -68,6 +68,17 @@ Sometimes the application may freeze and hang due to the serial communication. Y
 4. Checking the ground wire from the USB485, stepper motor, and power supply are connected
 5. See if voltage is running to the stepper motor
 6. Reinstalling the drivers
+7. If the app freezes it is because the device, is not sending back data, so the serial port is left hanging. In this case
+change all the following blocks from:
+
+```
+response = str(ser.read(7))
+```
+to
+
+```
+response = None
+```
 
 ### Mock Application
 If you would like to run the __**mock version**__, run in the command line:

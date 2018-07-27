@@ -16,8 +16,8 @@ app.config["suppress_callback_exceptions"] = True
 
 
 # Set COM Port Here:
-ser = serial.Serial("Insert COM PORT/PATH HERE", timeout=5)
-ser.flush()
+ser = serial.Serial("COM21")
+
 
 
 def defaultset():
@@ -583,7 +583,10 @@ app.layout = root_layout
 #     return
 
 # Dark Theme Provider
-@app.callback(Output("toggleTheme", "value"), [Input("url", "pathname")])
+@app.callback(
+    Output("toggleTheme", "value"), 
+    [Input("url", "pathname")]
+)
 def display_page(pathname):
 
     if pathname == "/dark":
@@ -603,12 +606,10 @@ def page_layout(value):
 # Enable Preset Settings
 @app.callback(
     Output("pre-settings", "disabled"),
-    [
-        Input("address-set", "value"),
-        Input("com-port", "value"),
-        Input("acceleration-set", "value"),
-        Input("baudrate", "value"),
-    ],
+    [Input("address-set", "value"),
+    Input("com-port", "value"),
+    Input("acceleration-set", "value"),
+    Input("baudrate", "value")],
 )
 def presetting_enable(address, com, accel_set, baud):
     if (baud != "") and (accel_set != "") and (address != "") and (com != ""):
@@ -621,14 +622,12 @@ def presetting_enable(address, com, accel_set, baud):
 @app.callback(
     Output("div-one", "children"),
     [Input("pre-settings", "value")],
-    [
-        State("address-set", "value"),
-        State("motor-current", "value"),
-        State("hold-current", "value"),
-        State("step-size", "value"),
-        State("acceleration-set", "value"),
-        State("baudrate", "value"),
-    ],
+    [State("address-set", "value"),
+    State("motor-current", "value"),
+    State("hold-current", "value"),
+    State("step-size", "value"),
+    State("acceleration-set", "value"),
+    State("baudrate", "value")]
 )
 def presetting_start(
     preset_switch, address, motor_current, hold_current, stepsize, accel_set, baud
@@ -646,8 +645,7 @@ def presetting_start(
         )
         ser.flush()
         ser.write(command.encode("utf-8"))
-
-        response = str(ser.read(7))
+        response = str(ser.read(7)) # Make response equal to none if freezing
         return response
     else:
         response = "Enable set. Set motor settings before using."
@@ -658,12 +656,10 @@ def presetting_start(
 @app.callback(
     Output("start-stop", "disabled"),
     [Input("pre-settings", "value")],
-    [
-        State("address-set", "value"),
-        State("acceleration-set", "value"),
-        State("baudrate", "value"),
-        State("com-port", "value"),
-    ],
+    [State("address-set", "value"),
+    State("acceleration-set", "value"),
+    State("baudrate", "value"),
+    State("com-port", "value")]
 )
 def presetting_enable_power(preset_switch, address, accel_set, baud, com):
     if (
@@ -688,8 +684,8 @@ def start_terminate(stop):
         ser.flush()
         term = "/1TRR\r".encode("utf-8")
         ser.write(term)
-        response = str(ser.read(7))
-        return response
+        response = str(ser.read(7)) # Make response equal to none if freezing
+        return 
     else:
         response = "Terminate commands and flush serial."
         return response
@@ -742,7 +738,8 @@ def velocity_mode(
         ser.write(velo.encode("utf-8"))
 
         if step_velo == 0 or step_velo == 5000:
-            response = str(ser.read(7))
+            response = str(ser.read(7)) # Make response equal to none if freezing
+            return response
         else:
             response = "Bring to 0 or 5000 to see response."
         return response
@@ -796,6 +793,7 @@ def position_mode(
 
         if step_position == 0 or step_position == 360:
             response = str(ser.read(7))
+            return response 
         else:
             response = "Bring to 0 or 360 for serial response."
         return response
