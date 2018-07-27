@@ -5,7 +5,7 @@ An application that allows the user to control the speed and absolute positionin
 
 
 ### Brushed DC Motor (Stepper Motor)
-When DC voltage is applied to one of these coils, a magnetic field is produced, due to [electromagnetic induction](https://en.wikipedia.org/wiki/Electromagnetic_induction). This field can either attract or repel the magnitized gear depending on the direction of current flowing through the coils, which can best be understood through [Lenz Law](https://en.wikipedia.org/wiki/Lenz%27s_law). The job of the magnetic field is to rotate and align the magntic gear, with the produced magnetic field (coil). This movement is known as a step. The direction of current flow is controled by a driver, which directs current/voltage to the coils based on the demand of the user. The coils act synchonously, in groups called phases, that can be directed by the driver to move to precise locations, or rotational speeds. For a further understanding read more [here](https://en.wikipedia.org/wiki/Stepper_motor)
+When DC voltage is applied to one of these coils, a magnetic field is produced, due to [electromagnetic induction](https://en.wikipedia.org/wiki/Electromagnetic_induction). This field can either attract or repel the magnitized gear depending on the direction of current flowing through the coils, which can best be understood through [Lenz Law](https://en.wikipedia.org/wiki/Lenz%27s_law). The job of the magnetic field is to rotate and align the magntic gear, with the produced magnetic field (coil). This movement is known as a step. The direction of current flow is controled by a driver, which directs current/voltage to the coils based on the demand of the user. The coils act synchonously, in groups called phases, that can be directed by the driver to move to precise locations, or rotational speeds. For a further understanding read more [here](https://en.wikipedia.org/wiki/Stepper_motor).
 
 
 ### dash-daq
@@ -107,6 +107,6 @@ Open the web address given to you in your browser and the application will be re
 
 
 ## Resources
-PySerial was used for serial communication. The API for PySerial can be found [here](http://pyserial.readthedocs.io/en/latest/pyserial_api.html). More detail and information on the commands that the stepper motor can take can be found in the [Lin Engineering documentation](https://www.linengineering.com/wp-content/uploads/downloads/Silverpak_17C/documentation/R256%20and%20Silverpak17C-CE%20Commands%20Manual.pdf). For a better understanding of this motor read the motor manual [here](https://www.linengineering.com/wp-content/uploads/downloads/Silverpak_17C/documentation/Silverpak17C-CE%20Manual.pdf)
+PySerial was used for serial communication. The API for PySerial can be found [here](http://pyserial.readthedocs.io/en/latest/pyserial_api.html). More detail and information on the commands that the stepper motor can take can be found in the [Lin Engineering documentation](https://www.linengineering.com/wp-content/uploads/downloads/Silverpak_17C/documentation/R256%20and%20Silverpak17C-CE%20Commands%20Manual.pdf). For a better understanding of this motor read the motor manual [here](https://www.linengineering.com/wp-content/uploads/downloads/Silverpak_17C/documentation/Silverpak17C-CE%20Manual.pdf).
 
 
