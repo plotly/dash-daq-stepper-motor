@@ -16,7 +16,7 @@ app.config["suppress_callback_exceptions"] = True
 
 
 # Set COM Port Here:
-ser = serial.Serial("COM21")
+ser = serial.Serial("Insert COM PORT/HERE")
 
 
 
